@@ -4,11 +4,15 @@
   "private": true,
   "description": "Screeps: World project using a TypeScript starter layout.",
   "scripts": {
-    "build": "tsc --noEmit",
-    "watch": "tsc --noEmit --watch"
+    "build": "node ./scripts/build.js",
+    "typecheck": "tsc --noEmit",
+    "watch": "tsc --noEmit --watch",
+    "upload": "node ./scripts/upload-screeps.js",
+    "deploy": "npm run build && npm run upload"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "esbuild": "^0.25.9",
     "typed-screeps": "^4.4.0",
     "typescript": "^5.8.3"
   }
