@@ -1,0 +1,15 @@
+{
+  "name": "screeps-ai-v03",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Screeps: World project using a TypeScript starter layout.",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "watch": "tsc --noEmit --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typed-screeps": "^4.4.0",
+    "typescript": "^5.8.3"
+  }
+}
