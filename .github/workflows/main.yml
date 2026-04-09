@@ -12,6 +12,7 @@ jobs:
   build-and-upload:
     runs-on: ubuntu-latest
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       SCREEPS_HOST: screeps.com
       SCREEPS_BRANCH: main
       SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
