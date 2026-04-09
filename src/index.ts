@@ -9,6 +9,9 @@ export const loop = (): void => {
 
   for (const name in Game.creeps) {
     const creep = Game.creeps[name];
+    if (!creep) {
+      continue;
+    }
 
     switch (creep.memory.role) {
       case "harvester":

@@ -3,14 +3,17 @@ const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
 export const runSpawnManagement = (): void => {
   for (const spawnName in Game.spawns) {
     const spawn = Game.spawns[spawnName];
+    if (!spawn) {
+      continue;
+    }
 
     if (spawn.spawning) {
       continue;
     }
 
-    const harvesters = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role === "harvester"
+    const harvesters = Object.values(Game.creeps).filter(
+      (creep): creep is Creep =>
+        creep !== undefined && creep.memory.role === "harvester"
     );
 
     if (harvesters.length < 2) {
@@ -20,9 +23,9 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
-    const builders = _.filter(
-      Game.creeps,
-      (creep) => creep.memory.role === "builder"
+    const builders = Object.values(Game.creeps).filter(
+      (creep): creep is Creep =>
+        creep !== undefined && creep.memory.role === "builder"
     );
 
     if (builders.length < 1) {
