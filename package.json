@@ -13,7 +13,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "esbuild": "^0.25.9",
-    "typed-screeps": "^4.4.0",
+    "@types/screeps": "^3.3.8",
     "typescript": "^5.8.3"
   }
 }

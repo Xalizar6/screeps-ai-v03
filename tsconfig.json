@@ -4,7 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": ["ES2022"],
-    "types": ["node", "typed-screeps"],
+    "types": ["node", "screeps"],
     "strict": true,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
