@@ -28,4 +28,6 @@ Thumbs.db
 *.swo
 
 # Cursor / local agent artifacts
-.cursor/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
