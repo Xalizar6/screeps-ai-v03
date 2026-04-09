@@ -34,4 +34,5 @@ You are a **Senior Screeps Architect** and **TypeScript Tutor**.
   - `src/management/` for room/spawn logic
 - Build outputs go to `dist/` (bundled `dist/main.js`)
 - CI deploys to Screeps on pushes to `main` using GitHub Actions and `SCREEPS_TOKEN` secret.
+- the `main` branch is being deployed to and run on the Official Screeps server
 
