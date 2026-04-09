@@ -4,6 +4,8 @@ import { runBuilder } from "./roles/builder";
 import { runHarvester } from "./roles/harvester";
 
 export const loop = (): void => {
+  console.log(`[loop:start] tick=${Game.time}`);
+
   runRoomManagement();
   runSpawnManagement();
 
@@ -24,4 +26,6 @@ export const loop = (): void => {
         break;
     }
   }
+
+  console.log(`[loop:end] tick=${Game.time}`);
 };
