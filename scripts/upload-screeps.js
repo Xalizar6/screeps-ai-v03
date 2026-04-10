@@ -36,7 +36,7 @@ async function upload() {
 
   if (!response.ok) {
     throw new Error(
-      `Screeps upload failed (${response.status} ${response.statusText}): ${bodyText}`
+      `Screeps upload failed (${response.status} ${response.statusText}): ${bodyText}`,
     );
   }
 

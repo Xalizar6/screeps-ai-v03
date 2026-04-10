@@ -37,4 +37,3 @@ This is a **project-oriented** overview of Screeps concepts that come up frequen
 
 - Objects can disappear (structures destroyed, creeps die), so stored IDs can become invalid.
 - Pathing and target selection can easily become CPU-heavy: centralize reuse where possible.
-

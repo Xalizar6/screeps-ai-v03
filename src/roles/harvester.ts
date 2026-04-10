@@ -6,7 +6,9 @@ export const runHarvester = (creep: Creep): void => {
   };
 
   if (creep.store.getFreeCapacity() === 0) {
-    debug(`state=full energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`);
+    debug(
+      `state=full energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`,
+    );
     const spawn = creep.room.find(FIND_MY_SPAWNS)[0];
     if (spawn) {
       const result = creep.transfer(spawn, RESOURCE_ENERGY);

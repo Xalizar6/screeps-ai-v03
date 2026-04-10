@@ -1,0 +1,15 @@
+# Default: normalize line endings on commit; store as LF in the repo
+* text=auto eol=lf
+
+# Shell scripts must stay LF (even on Windows) if you ever run them in Git Bash/WSL
+*.sh text eol=lf
+
+# Treat common binaries as binary (no EOL conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary

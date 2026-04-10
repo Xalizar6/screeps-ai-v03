@@ -21,8 +21,8 @@ For assistant persona and response-style rules, follow `.cursor/rules/screeps-tu
 
 - **Logging conventions**
 
-
 ## Repo conventions
+
 - Source code lives under `src/`
   - `src/roles/` for creep role logic
   - `src/management/` for room/spawn logic

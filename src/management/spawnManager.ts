@@ -13,7 +13,7 @@ export const runSpawnManagement = (): void => {
 
     const harvesters = Object.values(Game.creeps).filter(
       (creep): creep is Creep =>
-        creep !== undefined && creep.memory.role === "harvester"
+        creep !== undefined && creep.memory.role === "harvester",
     );
 
     if (harvesters.length < 2) {
@@ -25,7 +25,7 @@ export const runSpawnManagement = (): void => {
 
     const builders = Object.values(Game.creeps).filter(
       (creep): creep is Creep =>
-        creep !== undefined && creep.memory.role === "builder"
+        creep !== undefined && creep.memory.role === "builder",
     );
 
     if (builders.length < 1) {

@@ -23,6 +23,7 @@ This doc is **not** a full API mirror. It’s a curated set of API details and p
   - Handle `null` (object might no longer exist).
 
 Why:
+
 - Avoid repeated `find(...)` scans in hot loops.
 - Keeps role/management logic CPU-friendly.
 
@@ -31,6 +32,7 @@ Why:
 `Room.find(constant, [opts])` is powerful but can be expensive if used repeatedly.
 
 Prefer:
+
 - A single “room pass” in management to gather shared targets once per tick.
 - Storing durable targets as IDs in memory where it makes sense.
 
@@ -39,6 +41,7 @@ Prefer:
 Most creep actions return an error code (`OK`, `ERR_NOT_IN_RANGE`, etc.).
 
 Common pattern:
+
 - Attempt action
 - If `ERR_NOT_IN_RANGE`, `creep.moveTo(target)` (or your project’s movement helper)
 - If invalid target, clear cached ID and re-select
@@ -58,6 +61,7 @@ Common pattern:
 Screeps provides `PathFinder.search(...)` for custom cost matrices and advanced routing.
 
 Guideline:
+
 - Use default `moveTo` until you have a CPU/pathing reason to go lower-level.
 - If you introduce custom pathing, keep it centralized (management/util) and cache where possible.
 
@@ -66,4 +70,3 @@ Guideline:
 - Prefer ID caching + `Game.getObjectById` for known objects.
 - Null-check resolved objects and recover gracefully.
 - Avoid repeated `Object.values(Game.creeps)` style scans in hot loops unless necessary.
-

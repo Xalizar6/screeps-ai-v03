@@ -7,7 +7,7 @@ export const runBuilder = (creep: Creep): void => {
 
   if (creep.store[RESOURCE_ENERGY] === 0) {
     debug(
-      `state=empty energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`
+      `state=empty energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`,
     );
     const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
     if (source) {
@@ -27,7 +27,7 @@ export const runBuilder = (creep: Creep): void => {
   const site = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
   if (site) {
     debug(
-      `state=build energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()} site=${site.id}`
+      `state=build energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()} site=${site.id}`,
     );
     const result = creep.build(site);
     debug(`action=build result=${result}`);
