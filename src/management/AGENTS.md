@@ -21,6 +21,11 @@ These instructions apply when working in `src/management/`.
 
 - Keep exported APIs small and obvious (e.g. `runRoom(room: Room)` / `runSpawns(room: Room)`), so the main loop can call them predictably.
 
+## Logging
+
+- Export `LOG_MODULE` (stable id) from each management module for `createLogger` / `Memory.log.modules` overrides; align with repo-root `AGENTS.md` **Logging conventions**.
+- Prefer **`info` / `stat` / `moduleScope`** at information level; use **`path` / `debugLazy`** for deeper diagnosis. Avoid per-structure spam inside tight `room.find` loops unless gated by verbosity.
+
 ## References
 
 When implementing room/spawn orchestration or caching, consult:

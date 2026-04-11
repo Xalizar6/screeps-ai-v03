@@ -34,6 +34,16 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
   - Guard against `null` results when objects no longer exist.
 
 - **Logging conventions**
+  - Use `src/logging/` (`createLogger`, `moduleScope`, levels). Do not add ad-hoc `console.log` in hot creep paths unless you are debugging locally and plan to remove it before merge.
+  - **Levels (numeric internally, names in `Memory`)** — from quiet to chatty: `error` → `information` → `verbose` → `debug`. Compare with `>=` in code. Semantics:
+    - **error**: errors only (`Logger.error`, `console.error`-style lines).
+    - **information**: errors plus `info`, `stat`, and `moduleScope` lines (includes **CPU delta** for that scope via `Game.cpu.getUsed()`, not tick deltas — `Game.time` is fixed within a tick).
+    - **verbose**: above plus `path` (branch / code-path markers).
+    - **debug**: above plus `debugLazy` — **lazy** callbacks so disabled debug does almost no string work.
+  - **Module ids**: each subsystem uses a stable string id (e.g. `export const LOG_MODULE = "spawnManager" as const`) passed to `createLogger`. The main loop uses `"mainLoop"` and wraps room/spawn/role passes in `moduleScope` once per tick; **do not** log information-level begin/end **per creep** (aggregate in the role pass scope instead).
+  - **`Memory.log` overrides** — optional, no deploy: `Memory.log.default` and `Memory.log.modules[<moduleId>]` with values `"error"` \| `"information"` \| `"verbose"` \| `"debug"`. Invalid strings are ignored. Effective level: `Memory.log.modules[id] ?? Memory.log.default ?? code default`. Types: `LogConfigMemory` in `src/types.d.ts`.
+  - **Per-tick level cache**: each logger resolves the effective level once per `Game.time` so `Memory` is not re-read on every log line inside tight loops.
+  - **Output shape**: single-line, grep-friendly — e.g. `[tick=12345][harvester][SCOPE] label=rolePass cpuMs=0.084 creeps=2` and `[tick=12345][spawnManager][STAT] harvesters=2`.
 
 ## Repo conventions
 
