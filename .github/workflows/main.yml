@@ -28,16 +28,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Check formatting
-        run: npm run format:check
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npm run typecheck
-
-      - name: Build single main.js bundle
+      - name: Lint, format check, typecheck, and bundle
         run: npm run build
 
       - name: Upload bundle to Screeps

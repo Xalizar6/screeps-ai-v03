@@ -17,7 +17,11 @@ log.info("…");
 log.stat("name", 1); // information+
 log.path("…"); // verbose+
 log.debugLazy(() => `…`); // debug only
-log.moduleScope("label", () => {}, () => ({ creeps: 3 })); // optional endStats
+log.moduleScope(
+  "label",
+  () => {},
+  () => ({ creeps: 3 }),
+); // optional endStats
 log.blankLineAfterTick(); // mainLoop: blank line between ticks (information+)
 ```
 

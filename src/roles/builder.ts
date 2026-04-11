@@ -17,13 +17,15 @@ export const runBuilder = (creep: Creep): void => {
       log.path(`${creep.name} branch=pull_energy`);
       const result = creep.harvest(source);
       log.debugLazy(
-        () => `${creep.name} action=harvest source=${source.id} result=${result}`,
+        () =>
+          `${creep.name} action=harvest source=${source.id} result=${result}`,
       );
       if (result === ERR_NOT_IN_RANGE) {
         const move = creep.moveTo(source);
         log.path(`${creep.name} branch=harvest_not_in_range`);
         log.debugLazy(
-          () => `${creep.name} action=moveTo source=${source.id} result=${move}`,
+          () =>
+            `${creep.name} action=moveTo source=${source.id} result=${move}`,
         );
       }
     } else {
@@ -40,7 +42,9 @@ export const runBuilder = (creep: Creep): void => {
         `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()} site=${site.id}`,
     );
     const result = creep.build(site);
-    log.debugLazy(() => `${creep.name} action=build site=${site.id} result=${result}`);
+    log.debugLazy(
+      () => `${creep.name} action=build site=${site.id} result=${result}`,
+    );
     if (result === ERR_NOT_IN_RANGE) {
       const move = creep.moveTo(site);
       log.path(`${creep.name} branch=build_not_in_range`);

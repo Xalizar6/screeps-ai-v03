@@ -25,7 +25,10 @@ function formatLine(moduleId: string, tag: string, body: string): string {
   return `[tick=${Game.time}][${moduleId}][${tag}] ${body}`;
 }
 
-export function createLogger(moduleId: string, options: CreateLoggerOptions): Logger {
+export function createLogger(
+  moduleId: string,
+  options: CreateLoggerOptions,
+): Logger {
   const { defaultLevel } = options;
   let lastResolvedTick = -1;
   let cachedLevel: LogLevel = defaultLevel;

@@ -16,13 +16,15 @@ export const runHarvester = (creep: Creep): void => {
     if (spawn) {
       const result = creep.transfer(spawn, RESOURCE_ENERGY);
       log.debugLazy(
-        () => `${creep.name} action=transfer target=${spawn.name} result=${result}`,
+        () =>
+          `${creep.name} action=transfer target=${spawn.name} result=${result}`,
       );
       if (result === ERR_NOT_IN_RANGE) {
         const move = creep.moveTo(spawn);
         log.path(`${creep.name} branch=transfer_not_in_range`);
         log.debugLazy(
-          () => `${creep.name} action=moveTo target=${spawn.name} result=${move}`,
+          () =>
+            `${creep.name} action=moveTo target=${spawn.name} result=${move}`,
         );
       }
     } else {

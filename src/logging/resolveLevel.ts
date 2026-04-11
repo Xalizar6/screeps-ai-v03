@@ -4,7 +4,10 @@ import { LogLevel, parseLogLevel } from "./levels";
  * Effective level: Memory.log.modules[id] ?? Memory.log.default ?? codeDefault.
  * Invalid level strings in Memory are treated as unset.
  */
-export function getEffectiveLevel(moduleId: string, codeDefault: LogLevel): LogLevel {
+export function getEffectiveLevel(
+  moduleId: string,
+  codeDefault: LogLevel,
+): LogLevel {
   const logMem = Memory.log;
   if (!logMem) {
     return codeDefault;
