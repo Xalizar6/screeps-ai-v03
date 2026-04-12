@@ -52,6 +52,17 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
 - If additional packages or dependencies are needed, update package.json and other files as needed
 - treat docs/scratchpad.md as personal notes only; do not use it as project reference unless the user explicitly points you there
 
+## Documentation upkeep
+
+When a change affects how the project is built, run, deployed, organized, or how agents or contributors should work:
+
+- Update the **root `README.md`** for setup, scripts, CI/deploy notes, and other contributor-facing overview that no longer matches reality.
+- Update **nested `README.md` files** (for example `docs/agent-references/README.md`) when the scope or index they describe changes.
+- Update **this root `AGENTS.md`** when repo-wide standards or global agent instructions change.
+- Update **nested `AGENTS.md` files** when folder-specific conventions change (for example `src/logging/AGENTS.md` after logging contract changes).
+
+Keep documentation edits scoped to what the code change actually affects; avoid drive-by rewrites of unrelated docs.
+
 ## Reference material
 
 When you need Screeps gameplay or API details, consult the shared reference library:
