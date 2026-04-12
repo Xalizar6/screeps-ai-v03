@@ -23,7 +23,7 @@ These instructions apply when working in `src/management/`.
 
 ## Logging
 
-- Export `LOG_MODULE` (stable id) from each management module for `createLogger` / `Memory.log.modules` overrides; align with repo-root `AGENTS.md` **Logging conventions**.
+- Export `LOG_MODULE` and follow **`src/logging/AGENTS.md`** for `createLogger` / `Memory.log.modules` and shared conventions.
 - Prefer **`info` / `stat` / `moduleScope`** at information level; use **`path` / `debugLazy`** for deeper diagnosis. Avoid per-structure spam inside tight `room.find` loops unless gated by verbosity.
 
 ## References

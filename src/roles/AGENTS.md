@@ -23,7 +23,7 @@ These instructions apply when working in `src/roles/`.
 
 ## Logging
 
-- Use `createLogger` from `src/logging/logger.ts` with `export const LOG_MODULE = "<role>" as const` matching the `Memory.log.modules` key.
+- Follow **`src/logging/AGENTS.md`** (`LOG_MODULE`, levels, `Memory.log`). Use `createLogger` from `src/logging/logger.ts`.
 - Per-creep detail belongs in **`path` (verbose+)** and **`debugLazy` (debug+)** only; keep **information** quiet so the main loop’s per-role `moduleScope` stays the primary signal at default levels.
 - Prefer `debugLazy` with a zero-argument callback so strings are built only when debug logging is enabled.
 

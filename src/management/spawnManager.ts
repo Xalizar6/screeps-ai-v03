@@ -1,6 +1,6 @@
-const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
-
 export const LOG_MODULE = "spawnManager" as const;
+
+const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
 
 export const runSpawnManagement = (): void => {
   for (const spawnName in Game.spawns) {
