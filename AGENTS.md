@@ -44,6 +44,7 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
 - CI deploys to Screeps on pushes to `main` using GitHub Actions and `SCREEPS_TOKEN` secret.
 - The `main` branch is deployed to and run on the Official Screeps server.
 - If additional packages or dependencies are needed, update package.json and other files as needed
+- treat docs/scratchpad.md as personal notes only; do not use it as project reference unless the user explicitly points you there
 
 ## Reference material
 
