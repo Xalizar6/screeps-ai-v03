@@ -1,6 +1,10 @@
 import { createLogger } from "./logging/logger";
 import { LogLevel } from "./logging/levels";
 import {
+  LOG_MODULE as creepMemoryGcModule,
+  runDeadCreepMemoryCleanup,
+} from "./management/creepMemoryGc";
+import {
   LOG_MODULE as roomManagerModule,
   runRoomManagement,
 } from "./management/roomManager";
@@ -13,6 +17,9 @@ import { LOG_MODULE as harvesterModule, runHarvester } from "./roles/harvester";
 import { LOG_MODULE as upgraderModule, runUpgrader } from "./roles/upgrader";
 
 const loopLogger = createLogger("mainLoop", {
+  defaultLevel: LogLevel.Information,
+});
+const creepMemoryGcLogger = createLogger(creepMemoryGcModule, {
   defaultLevel: LogLevel.Information,
 });
 const roomLogger = createLogger(roomManagerModule, {
@@ -46,6 +53,10 @@ export const loop = (): void => {
   loopLogger.moduleScope(
     "tick",
     () => {
+      creepMemoryGcLogger.moduleScope("runDeadCreepMemoryCleanup", () => {
+        runDeadCreepMemoryCleanup();
+      });
+
       roomLogger.moduleScope("runRoomManagement", () => {
         runRoomManagement();
       });

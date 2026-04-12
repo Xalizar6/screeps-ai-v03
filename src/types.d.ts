@@ -30,6 +30,7 @@ interface LogConfigMemory {
 }
 
 interface Memory {
+  creeps?: Record<string, CreepMemory>;
   log?: LogConfigMemory;
 }
 
