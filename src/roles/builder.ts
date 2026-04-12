@@ -108,6 +108,12 @@ function runBuild(creep: Creep): void {
 }
 
 export const runBuilder = (creep: Creep): void => {
+  if (creep.room.find(FIND_CONSTRUCTION_SITES).length === 0) {
+    log.path(`${creep.name} branch=suicide_no_construction_sites`);
+    creep.suicide();
+    return;
+  }
+
   const state = ensureState(creep);
   if (state === "build") {
     runBuild(creep);

@@ -30,7 +30,10 @@ export const runSpawnManagement = (): void => {
         creep !== undefined && creep.memory.role === "builder",
     );
 
-    if (builders.length < 1) {
+    const hasConstructionSite =
+      spawn.room.find(FIND_CONSTRUCTION_SITES).length > 0;
+
+    if (builders.length < 1 && hasConstructionSite) {
       spawn.spawnCreep(DEFAULT_BODY, `builder-${Game.time}`, {
         memory: { role: "builder" },
       });
