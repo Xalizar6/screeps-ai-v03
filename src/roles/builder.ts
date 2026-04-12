@@ -1,58 +1,117 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
+import { isStoreEmpty, isStoreFull, transitionState } from "./fsm";
 
 export const LOG_MODULE = "builder" as const;
 
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
-export const runBuilder = (creep: Creep): void => {
-  if (creep.store[RESOURCE_ENERGY] === 0) {
-    log.path(`${creep.name} branch=empty_carry`);
-    log.debugLazy(
-      () =>
-        `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`,
-    );
-    const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-    if (source) {
-      log.path(`${creep.name} branch=pull_energy`);
-      const result = creep.harvest(source);
-      log.debugLazy(
-        () =>
-          `${creep.name} action=harvest source=${source.id} result=${result}`,
-      );
-      if (result === ERR_NOT_IN_RANGE) {
-        const move = creep.moveTo(source);
-        log.path(`${creep.name} branch=harvest_not_in_range`);
-        log.debugLazy(
-          () =>
-            `${creep.name} action=moveTo source=${source.id} result=${move}`,
-        );
-      }
-    } else {
-      log.path(`${creep.name} branch=no_active_source`);
-    }
-    return;
-  }
+type BuilderState = "harvest" | "build";
 
+function ensureState(creep: Creep): BuilderState {
+  if (creep.memory.state !== "harvest" && creep.memory.state !== "build") {
+    creep.memory.state = "harvest";
+    creep.memory.stateSinceTick = Game.time;
+  }
+  return creep.memory.state === "build" ? "build" : "harvest";
+}
+
+function resolveSource(creep: Creep): Source | null {
+  const raw = creep.memory.targetId
+    ? Game.getObjectById(creep.memory.targetId)
+    : null;
+  if (raw instanceof Source) {
+    return raw;
+  }
+  if (raw) {
+    delete creep.memory.targetId;
+  }
+  const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+  if (source) {
+    creep.memory.targetId = source.id;
+  }
+  return source;
+}
+
+function resolveSite(creep: Creep): ConstructionSite | null {
+  const raw = creep.memory.targetId
+    ? Game.getObjectById(creep.memory.targetId)
+    : null;
+  if (raw instanceof ConstructionSite) {
+    return raw;
+  }
+  if (raw) {
+    delete creep.memory.targetId;
+  }
   const site = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
   if (site) {
-    log.path(`${creep.name} branch=build`);
+    creep.memory.targetId = site.id;
+  }
+  return site;
+}
+
+function runHarvest(creep: Creep): void {
+  if (isStoreFull(creep)) {
+    transitionState(creep, "build");
+    return;
+  }
+  log.path(`${creep.name} branch=empty_carry`);
+  log.debugLazy(
+    () =>
+      `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`,
+  );
+  const source = resolveSource(creep);
+  if (!source) {
+    log.path(`${creep.name} branch=no_active_source`);
+    return;
+  }
+  log.path(`${creep.name} branch=pull_energy`);
+  const result = creep.harvest(source);
+  log.debugLazy(
+    () => `${creep.name} action=harvest source=${source.id} result=${result}`,
+  );
+  if (result === ERR_NOT_IN_RANGE) {
+    const move = creep.moveTo(source);
+    log.path(`${creep.name} branch=harvest_not_in_range`);
     log.debugLazy(
-      () =>
-        `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()} site=${site.id}`,
+      () => `${creep.name} action=moveTo source=${source.id} result=${move}`,
     );
-    const result = creep.build(site);
-    log.debugLazy(
-      () => `${creep.name} action=build site=${site.id} result=${result}`,
-    );
-    if (result === ERR_NOT_IN_RANGE) {
-      const move = creep.moveTo(site);
-      log.path(`${creep.name} branch=build_not_in_range`);
-      log.debugLazy(
-        () => `${creep.name} action=moveTo site=${site.id} result=${move}`,
-      );
-    }
-  } else {
+  }
+}
+
+function runBuild(creep: Creep): void {
+  if (isStoreEmpty(creep)) {
+    transitionState(creep, "harvest");
+    return;
+  }
+  const site = resolveSite(creep);
+  if (!site) {
     log.path(`${creep.name} branch=no_construction_site`);
+    return;
+  }
+  log.path(`${creep.name} branch=build`);
+  log.debugLazy(
+    () =>
+      `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()} site=${site.id}`,
+  );
+  const result = creep.build(site);
+  log.debugLazy(
+    () => `${creep.name} action=build site=${site.id} result=${result}`,
+  );
+  if (result === ERR_NOT_IN_RANGE) {
+    const move = creep.moveTo(site);
+    log.path(`${creep.name} branch=build_not_in_range`);
+    log.debugLazy(
+      () => `${creep.name} action=moveTo site=${site.id} result=${move}`,
+    );
+  }
+}
+
+export const runBuilder = (creep: Creep): void => {
+  const state = ensureState(creep);
+  if (state === "build") {
+    runBuild(creep);
+  } else {
+    runHarvest(creep);
   }
 };

@@ -2,6 +2,15 @@
 
 Screeps World AI created with AI agent assistance.
 
+## Architecture (creep roles)
+
+- **Main loop** (`src/index.ts`): room/spawn management, then per-role passes over `Game.creeps`.
+- **Roles** (`src/roles/*.ts`): each creep role is a small **finite state machine** stored in `Memory.creeps[name]` (`state`, optional `targetId`, `stateSinceTick`). Transition rules and dispatch stay **inside the role file** for cohesion.
+- **FSM helpers** (`src/roles/fsm.ts`): shared pure functions only (`isStoreEmpty`, `isStoreFull`, `transitionState`, `getObjectByIdOrNull`). No `Creep.prototype` extensions for trivial checks.
+- **Types** (`src/types.d.ts`): extend `CreepMemory` when adding states or persisted ids.
+
+To add a role: add `runYourRole(creep)`, extend `CreepMemory.role` / state fields, wire the role pass in `src/index.ts`, and export `LOG_MODULE` per `src/roles/AGENTS.md`.
+
 ## Logging
 
 Logging lives in `src/logging/` (`createLogger`, levels, `Memory.log` resolution). Lines look like `[tick=…][moduleId][TAG] …`. Types for `Memory.log` are in `src/types.d.ts`.

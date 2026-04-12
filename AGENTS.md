@@ -33,6 +33,11 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
   - Prefer `Game.getObjectById` for retrieving known objects (sources, structures, etc.) from cached IDs.
   - Guard against `null` results when objects no longer exist.
 
+- **Creep behavior (finite state machines)**
+  - Each role in `src/roles/` owns its FSM: states, transitions, and per-state actions live in that role file (not in one shared cross-role machine).
+  - Shared **helpers only** live in `src/roles/fsm.ts` (store checks, `transitionState`, `getObjectByIdOrNull`). Do not extend `Creep.prototype` for simple guards; prefer pure helpers.
+  - Persist `CreepMemory.state`, optional `targetId`, and `stateSinceTick` via `src/types.d.ts`; resolve cached IDs with `instanceof` or null checks so stale targets are cleared.
+
 - **Logging** — Use `src/logging/` (`createLogger`, `moduleScope`, levels). Full conventions, `LOG_MODULE` export rules, `Memory.log`, and level semantics: **`src/logging/AGENTS.md`**.
 
 ## Repo conventions
