@@ -46,6 +46,7 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
   - `src/roles/` for creep role logic
   - `src/management/` for room/spawn logic
 - Build outputs go to `dist/` (bundled `dist/main.js`). Avoid editing build artifacts directly.
+- When verifying changes locally, run **`npm run fix`** before **`npm run build`**, so auto-fixable ESLint and Prettier issues are resolved before `build` runs non-mutating checks (`lint`, `format:check`, typecheck, and bundling).
 - CI deploys to Screeps on pushes to `main` using GitHub Actions and `SCREEPS_TOKEN` secret.
 - The `main` branch is deployed to and run on the Official Screeps server.
 - If additional packages or dependencies are needed, update package.json and other files as needed
