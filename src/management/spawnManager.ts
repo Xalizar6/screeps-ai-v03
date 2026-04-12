@@ -30,7 +30,7 @@ export const runSpawnManagement = (): void => {
         creep !== undefined && creep.memory.role === "upgrader",
     );
 
-    if (upgraders.length < 2) {
+    if (upgraders.length < 3) {
       spawn.spawnCreep(DEFAULT_BODY, `upgrader-${Game.time}`, {
         memory: { role: "upgrader" },
       });
@@ -42,10 +42,10 @@ export const runSpawnManagement = (): void => {
         creep !== undefined && creep.memory.role === "builder",
     );
 
-    const hasConstructionSite =
-      spawn.room.find(FIND_CONSTRUCTION_SITES).length > 0;
+    const unfinishedSites = spawn.room.find(FIND_CONSTRUCTION_SITES).length;
+    const desiredBuilders = Math.ceil(unfinishedSites / 3);
 
-    if (builders.length < 1 && hasConstructionSite) {
+    if (builders.length < desiredBuilders) {
       spawn.spawnCreep(DEFAULT_BODY, `builder-${Game.time}`, {
         memory: { role: "builder" },
       });
