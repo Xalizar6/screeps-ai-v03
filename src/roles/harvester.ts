@@ -1,6 +1,11 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
-import { isStoreEmpty, isStoreFull, transitionState } from "./fsm";
+import {
+  isStoreEmpty,
+  isStoreFull,
+  resolveSource,
+  transitionState,
+} from "./fsm";
 
 export const LOG_MODULE = "harvester" as const;
 
@@ -14,23 +19,6 @@ function ensureState(creep: Creep): HarvesterState {
     creep.memory.stateSinceTick = Game.time;
   }
   return creep.memory.state === "deliver" ? "deliver" : "harvest";
-}
-
-function resolveSource(creep: Creep): Source | null {
-  const raw = creep.memory.targetId
-    ? Game.getObjectById(creep.memory.targetId)
-    : null;
-  if (raw instanceof Source) {
-    return raw;
-  }
-  if (raw) {
-    delete creep.memory.targetId;
-  }
-  const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-  if (source) {
-    creep.memory.targetId = source.id;
-  }
-  return source;
 }
 
 function resolveSpawn(creep: Creep): StructureSpawn | null {

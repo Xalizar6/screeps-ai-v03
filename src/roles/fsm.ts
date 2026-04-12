@@ -32,6 +32,27 @@ export function getObjectByIdOrNull<T extends _HasId>(
   return Game.getObjectById(id);
 }
 
+/**
+ * Uses `creep.memory.targetId` when it resolves to an active source; otherwise picks
+ * the closest active source by path and caches its id.
+ */
+export function resolveSource(creep: Creep): Source | null {
+  const raw = getObjectByIdOrNull<
+    Source | StructureSpawn | ConstructionSite | StructureController
+  >(creep.memory.targetId);
+  if (raw instanceof Source) {
+    return raw;
+  }
+  if (raw) {
+    delete creep.memory.targetId;
+  }
+  const source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+  if (source) {
+    creep.memory.targetId = source.id;
+  }
+  return source;
+}
+
 export type TransitionStateOptions = {
   /** When true (default), clears `targetId` so the next state picks a fresh target. */
   clearTarget?: boolean;
