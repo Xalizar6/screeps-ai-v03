@@ -10,6 +10,7 @@ import {
 } from "./management/spawnManager";
 import { LOG_MODULE as builderModule, runBuilder } from "./roles/builder";
 import { LOG_MODULE as harvesterModule, runHarvester } from "./roles/harvester";
+import { LOG_MODULE as upgraderModule, runUpgrader } from "./roles/upgrader";
 
 const loopLogger = createLogger("mainLoop", {
   defaultLevel: LogLevel.Information,
@@ -24,6 +25,9 @@ const harvesterLogger = createLogger(harvesterModule, {
   defaultLevel: LogLevel.Information,
 });
 const builderLogger = createLogger(builderModule, {
+  defaultLevel: LogLevel.Information,
+});
+const upgraderLogger = createLogger(upgraderModule, {
   defaultLevel: LogLevel.Information,
 });
 
@@ -62,6 +66,20 @@ export const loop = (): void => {
           }
         },
         () => ({ creeps: countCreepsByRole("harvester") }),
+      );
+
+      upgraderLogger.moduleScope(
+        "rolePass",
+        () => {
+          for (const name in Game.creeps) {
+            const creep = Game.creeps[name];
+            if (!creep || creep.memory.role !== "upgrader") {
+              continue;
+            }
+            runUpgrader(creep);
+          }
+        },
+        () => ({ creeps: countCreepsByRole("upgrader") }),
       );
 
       builderLogger.moduleScope(

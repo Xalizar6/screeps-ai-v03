@@ -2,6 +2,21 @@
 
 Personal notes and Screeps console snippets. This file is listed in `.cursorignore` so Cursor does not treat it as project reference material by default.
 
+## Learning
+
+### types.d.ts
+
+- explain interface
+- explain type
+
+### logger.ts
+
+- explain the whole module
+
+### other
+
+- what are callbacks
+
 ## Notes
 
 ## Screeps console

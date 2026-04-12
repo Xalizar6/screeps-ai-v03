@@ -25,6 +25,18 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
+    const upgraders = Object.values(Game.creeps).filter(
+      (creep): creep is Creep =>
+        creep !== undefined && creep.memory.role === "upgrader",
+    );
+
+    if (upgraders.length < 2) {
+      spawn.spawnCreep(DEFAULT_BODY, `upgrader-${Game.time}`, {
+        memory: { role: "upgrader" },
+      });
+      continue;
+    }
+
     const builders = Object.values(Game.creeps).filter(
       (creep): creep is Creep =>
         creep !== undefined && creep.memory.role === "builder",
