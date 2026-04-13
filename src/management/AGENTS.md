@@ -6,6 +6,7 @@ These instructions apply when working in `src/management/`.
 
 - Management modules coordinate **room/spawn-level decisions** (e.g. population targets, spawn queues, room-wide caching).
 - Avoid embedding detailed per-creep behavior here; delegate to role modules in `src/roles/`.
+- **Automated layout / construction planning** (e.g. where to place structures or sites) lives in dedicated modules such as `roomConstruction.ts`; if that grows, split under `construction/` and keep `roomManager` as the orchestrator that calls into them.
 
 ## CPU + data flow expectations
 
