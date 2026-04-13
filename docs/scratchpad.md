@@ -26,6 +26,7 @@ Personal notes and Screeps console snippets. This file is listed in `.cursorigno
 #### Screeps Sandbox (jayseegames.com)
 
 - Room:
+- Web: http://jayseegames.com:21025/web/
 
 #### Newbie Land (screeps.newbieland.net)
 
