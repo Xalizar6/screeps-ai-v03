@@ -12,12 +12,31 @@ const SCREEPS_PASSWORD = (process.env.SCREEPS_PASSWORD || "").trim();
 const BUILD_OUTPUT_PATH = "dist/main.js";
 
 /**
+ * Official `screeps.com` uses https on 443 (defaults). Many community servers
+ * use http on port 80 (omit SCREEPS_PORT) or http on 21025 (set SCREEPS_PORT).
+ */
+function getApiOrigin() {
+  let protocol = (process.env.SCREEPS_PROTOCOL || "https")
+    .trim()
+    .replace(/:$/, "");
+  if (!protocol) {
+    protocol = "https";
+  }
+  protocol = protocol.toLowerCase();
+
+  const port = (process.env.SCREEPS_PORT || "").trim();
+  const portPart = port ? `:${port}` : "";
+
+  return `${protocol}://${SCREEPS_HOST}${portPart}`;
+}
+
+/**
  * Many community / private servers use email+password sign-in instead of
  * long-lived auth tokens. Flow: POST /api/auth/signin → use returned token
  * on POST /api/user/code (often with X-Username as well).
  */
 async function signIn() {
-  const response = await fetch(`https://${SCREEPS_HOST}/api/auth/signin`, {
+  const response = await fetch(`${getApiOrigin()}/api/auth/signin`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -78,7 +97,7 @@ async function upload() {
     headers["X-Username"] = SCREEPS_USERNAME;
   }
 
-  const response = await fetch(`https://${SCREEPS_HOST}/api/user/code`, {
+  const response = await fetch(`${getApiOrigin()}/api/user/code`, {
     method: "POST",
     headers,
     body: JSON.stringify({
