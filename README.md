@@ -66,4 +66,4 @@ GitHub Actions builds (`npm run build`) then uploads `dist/main.js` via [`script
 
 `SCREEPS_BRANCH` in CI is the branch tab in the Screeps code editor on that server, not the git branch name. Official releases: push or merge to `main`. Try changes on the community server by pushing to `test`. Upload script env: **`SCREEPS_PROTOCOL`** / **`SCREEPS_PORT`** (see [`.env.example`](.env.example)).
 
-**Credentials and git:** never commit passwords, tokens, or `.env`. Use [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for CI. For local uploads, keep a gitignored `.env` (see [`.env.example`](.env.example)) or set environment variables in your shell only.
+**Credentials and git:** never commit passwords, tokens, or `.env`. Use [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for CI. Locally, `npm run upload` loads a repo-root `.env` **only if that file exists** (via [`scripts/run-upload.js`](scripts/run-upload.js)); CI has no `.env` and uses the workflow `env` block. You can still rely on shell-exported variables instead of `.env`.
