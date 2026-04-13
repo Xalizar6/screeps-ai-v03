@@ -23,9 +23,11 @@ Personal notes and Screeps console snippets. This file is listed in `.cursorigno
 
 #### Official
 
+- Room: E2N56
+
 #### Screeps Sandbox (jayseegames.com)
 
-- Room:
+- Room: W3S1
 - Web: http://jayseegames.com:21025/web/
 
 #### Newbie Land (screeps.newbieland.net)
@@ -37,12 +39,15 @@ Personal notes and Screeps console snippets. This file is listed in `.cursorigno
 
 ### Logging
 
-- Memory.log = { default: "information" }; // typical: scope + CPU lines
-- Memory.log = { default: "error" }; // quiet
-- Memory.log = { default: "verbose" }; // + path
-- Memory.log = { default: "debug" }; // + debugLazy
-- Memory.log = { default: "error", modules: { harvester: "debug" } }; // one subsystem loud
-- delete Memory.log; // back to code defaults
+    Memory.log = { default: "information" }; // typical: scope + CPU lines
+    Memory.log = { default: "error" }; // quiet
+    Memory.log = { default: "verbose" }; // + path
+    Memory.log = { default: "debug" }; // + debugLazy
+    Memory.log = { default: "error", modules: { harvester: "debug" } }; // one subsystem loud
+    delete Memory.log; // back to code defaults
+
+### Signage
+    Game.creeps['upgrader-5492007'].signController(Game.rooms['W3S1'].controller, '') # must be within range 1 of the controller
 
 ### Memory
 
