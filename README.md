@@ -53,4 +53,17 @@ More detail: **Logging conventions** in `AGENTS.md`, plus `src/roles/AGENTS.md` 
 
 - `npm run build` — bundle to `dist/`
 - `npm run typecheck` / `npm run lint` — quality checks
-- `npm run deploy` — build and upload (requires Screeps credentials; see project scripts)
+- `npm run deploy` — build and upload (requires Screeps credentials; see [`.env.example`](.env.example))
+
+## CI and deploy
+
+GitHub Actions builds (`npm run build`) then uploads `dist/main.js` via [`scripts/upload-screeps.js`](scripts/upload-screeps.js).
+
+| Git branch | Workflow                     | Target                                                                                                                                                                                                                                                                                                                                                                |
+| ---------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `main`     | `.github/workflows/main.yml` | Official server: host `screeps.com`, in-game code branch `main`. Uses secret `SCREEPS_TOKEN`.                                                                                                                                                                                                                                                                         |
+| `test`     | `.github/workflows/test.yml` | Community server: variable **`SCREEPS_TEST_HOST`** (hostname only, no `https://`). Auth: either secret **`SCREEPS_TEST_TOKEN`**, or secrets **`SCREEPS_TEST_USERNAME`** + **`SCREEPS_TEST_PASSWORD`** (password path calls `/api/auth/signin` then uploads). Optional variable **`SCREEPS_TEST_BRANCH`** for the **Screeps editor** code branch (defaults to `test`). |
+
+`SCREEPS_BRANCH` in CI is the branch tab in the Screeps code editor on that server, not the git branch name. Official releases: push or merge to `main`. Try changes on the community server by pushing to `test`.
+
+**Credentials and git:** never commit passwords, tokens, or `.env`. Use [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for CI. For local uploads, keep a gitignored `.env` (see [`.env.example`](.env.example)) or set environment variables in your shell only.

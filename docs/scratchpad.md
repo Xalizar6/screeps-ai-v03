@@ -17,7 +17,20 @@ Personal notes and Screeps console snippets. This file is listed in `.cursorigno
 
 - what are callbacks
 
+
+
 ## Notes
+
+### Rooms
+
+#### Official
+
+#### Screeps Sandbox (jayseegames.com)
+- Room: 
+
+#### Newbie Land (screeps.newbieland.net)
+- W12S27
+- 4/12/2026 [DR]: Looks like this hasn't updated to Node.js (v24) yet so I either need to find a different community server or run one of my own or stick with official for now or Lower the compile target (e.g. toward ES2017/ES2018 or whatever that community documents) so optional chaining is transpiled to older-safe code, or avoid that syntax in emitted JS
 
 ## Screeps console
 

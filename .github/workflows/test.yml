@@ -1,0 +1,39 @@
+name: Build and Deploy Screeps (community / test branch)
+
+on:
+  push:
+    branches:
+      - test
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      SCREEPS_HOST: ${{ vars.SCREEPS_TEST_HOST }}
+      SCREEPS_BRANCH: ${{ vars.SCREEPS_TEST_BRANCH != '' && vars.SCREEPS_TEST_BRANCH || 'test' }}
+      # Prefer SCREEPS_TEST_TOKEN when the server issues tokens; otherwise set
+      # SCREEPS_TEST_USERNAME + SCREEPS_TEST_PASSWORD (see README).
+      SCREEPS_TOKEN: ${{ secrets.SCREEPS_TEST_TOKEN }}
+      SCREEPS_USERNAME: ${{ secrets.SCREEPS_TEST_USERNAME }}
+      SCREEPS_PASSWORD: ${{ secrets.SCREEPS_TEST_PASSWORD }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint, format check, typecheck, and bundle
+        run: npm run build
+
+      - name: Upload bundle to community Screeps server
+        run: npm run upload

@@ -47,7 +47,7 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
   - `src/management/` for room/spawn logic
 - Build outputs go to `dist/` (bundled `dist/main.js`). Avoid editing build artifacts directly.
 - When verifying changes locally, run **`npm run fix`** before **`npm run build`**, so auto-fixable ESLint and Prettier issues are resolved before `build` runs non-mutating checks (`lint`, `format:check`, typecheck, and bundling).
-- CI deploys to Screeps on pushes to `main` using GitHub Actions and `SCREEPS_TOKEN` secret.
+- CI deploys via GitHub Actions: pushes to **`main`** upload to the Official server (`screeps.com`, in-game branch `main`) using the `SCREEPS_TOKEN` secret; pushes to **`test`** upload to a community server using variable `SCREEPS_TEST_HOST`, optional `SCREEPS_TEST_BRANCH`, and either secret `SCREEPS_TEST_TOKEN` or secrets `SCREEPS_TEST_USERNAME` + `SCREEPS_TEST_PASSWORD` (see `scripts/upload-screeps.js` and README). Never commit credentials; use Actions secrets and a gitignored `.env` locally ([`.env.example`](.env.example)).
 - The `main` branch is deployed to and run on the Official Screeps server.
 - If additional packages or dependencies are needed, update package.json and other files as needed
 - treat docs/scratchpad.md as personal notes only; do not use it as project reference unless the user explicitly points you there
