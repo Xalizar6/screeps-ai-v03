@@ -1,4 +1,10 @@
+import { createLogger } from "../logging/logger";
+import { LogLevel } from "../logging/levels";
+import { countRepairBacklog } from "./repairConfig";
+
 export const LOG_MODULE = "spawnManager" as const;
+
+const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
 
@@ -9,7 +15,12 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
-    if (spawn.spawning) {
+    const spawningNow = spawn.spawning;
+    if (spawningNow) {
+      log.debugLazy(
+        () =>
+          `spawn=${spawn.name} skip=already_spawning current=${spawningNow.name}`,
+      );
       continue;
     }
 
@@ -19,9 +30,15 @@ export const runSpawnManagement = (): void => {
     );
 
     if (harvesters.length < 2) {
-      spawn.spawnCreep(DEFAULT_BODY, `harvester-${Game.time}`, {
+      const code = spawn.spawnCreep(DEFAULT_BODY, `harvester-${Game.time}`, {
         memory: { role: "harvester" },
       });
+      log.debugLazy(
+        () =>
+          `spawn=${spawn.name} branch=harvester have=${harvesters.length} need=2 bodyCost=${bodyCost(
+            DEFAULT_BODY,
+          )} energy=${spawn.room.energyAvailable} code=${code}`,
+      );
       continue;
     }
 
@@ -31,9 +48,15 @@ export const runSpawnManagement = (): void => {
     );
 
     if (upgraders.length < 3) {
-      spawn.spawnCreep(DEFAULT_BODY, `upgrader-${Game.time}`, {
+      const code = spawn.spawnCreep(DEFAULT_BODY, `upgrader-${Game.time}`, {
         memory: { role: "upgrader" },
       });
+      log.debugLazy(
+        () =>
+          `spawn=${spawn.name} branch=upgrader have=${upgraders.length} need=3 bodyCost=${bodyCost(
+            DEFAULT_BODY,
+          )} energy=${spawn.room.energyAvailable} code=${code}`,
+      );
       continue;
     }
 
@@ -46,9 +69,48 @@ export const runSpawnManagement = (): void => {
     const desiredBuilders = Math.ceil(unfinishedSites / 3);
 
     if (builders.length < desiredBuilders) {
-      spawn.spawnCreep(DEFAULT_BODY, `builder-${Game.time}`, {
+      const code = spawn.spawnCreep(DEFAULT_BODY, `builder-${Game.time}`, {
         memory: { role: "builder" },
       });
+      log.debugLazy(
+        () =>
+          `spawn=${spawn.name} branch=builder have=${builders.length} desired=${desiredBuilders} sites=${unfinishedSites} bodyCost=${bodyCost(
+            DEFAULT_BODY,
+          )} energy=${spawn.room.energyAvailable} code=${code}`,
+      );
+      continue;
+    }
+
+    const repairers = Object.values(Game.creeps).filter(
+      (creep): creep is Creep =>
+        creep !== undefined && creep.memory.role === "repairer",
+    );
+
+    const repairBacklog = countRepairBacklog(spawn.room);
+    const desiredRepairers = Math.ceil(repairBacklog / 3);
+    const needMoreRepairers = repairers.length < desiredRepairers;
+
+    log.debugLazy(
+      () =>
+        `spawn=${spawn.name} branch=repair backlog=${repairBacklog} desiredRepairers=${desiredRepairers} repairers=${repairers.length} needSpawn=${needMoreRepairers} energy=${spawn.room.energyAvailable} bodyCost=${bodyCost(DEFAULT_BODY)}`,
+    );
+
+    if (needMoreRepairers) {
+      const code = spawn.spawnCreep(DEFAULT_BODY, `repairer-${Game.time}`, {
+        memory: { role: "repairer" },
+      });
+      log.debugLazy(
+        () =>
+          `spawn=${spawn.name} action=spawnRepairer code=${code} name=repairer-${Game.time}`,
+      );
     }
   }
 };
+
+function bodyCost(body: BodyPartConstant[]): number {
+  let sum = 0;
+  for (const part of body) {
+    sum += BODYPART_COST[part];
+  }
+  return sum;
+}

@@ -1,54 +1,43 @@
-# Scratchpad
+Scratchpad
+    Personal notes and Screeps console snippets. This file is listed in `.cursorignore` so Cursor does not treat it as project reference material by default.
 
-Personal notes and Screeps console snippets. This file is listed in `.cursorignore` so Cursor does not treat it as project reference material by default.
+Learning:
 
-## Learning
+    types.d.ts
+        explain interface
+        explain type
 
-### types.d.ts
+    logger.ts
+        explain the whole module
 
-- explain interface
-- explain type
+    other
+        what are callbacks
 
-### logger.ts
+Notes:
+    Rooms:
+        Official Server:
+            Room: E2N56
 
-- explain the whole module
+        Screeps Sandbox (jayseegames.com)
+            Room: W3S1
+            Web: http://jayseegames.com:21025/web/
 
-### other
 
-- what are callbacks
+Screeps console commands
 
-## Notes
+    Logging:
+        Memory.log = { default: "information" }; // typical: scope + CPU lines
+        Memory.log = { default: "error" }; // quiet
+        Memory.log = { default: "verbose" }; // + path
+        Memory.log = { default: "debug" }; // + debugLazy
+        Memory.log = { default: "error", modules: {spawnManager: "debug" } }; // one subsystem loud
+        delete Memory.log; // back to code defaults
 
-### Rooms
+    Signage
+        Game.creeps['upgrader-5492007'].signController(Game.rooms['W3S1'].controller, '') # must be within range 1 of the controller
 
-#### Official
+    Memory
 
-- Room: E2N56
 
-#### Screeps Sandbox (jayseegames.com)
 
-- Room: W3S1
-- Web: http://jayseegames.com:21025/web/
-
-#### Newbie Land (screeps.newbieland.net)
-
-- W12S27
-- 4/12/2026 [DR]: Looks like this hasn't updated to Node.js (v24) yet so I either need to find a different community server or run one of my own or stick with official for now or Lower the compile target (e.g. toward ES2017/ES2018 or whatever that community documents) so optional chaining is transpiled to older-safe code, or avoid that syntax in emitted JS
-
-## Screeps console
-
-### Logging
-
-    Memory.log = { default: "information" }; // typical: scope + CPU lines
-    Memory.log = { default: "error" }; // quiet
-    Memory.log = { default: "verbose" }; // + path
-    Memory.log = { default: "debug" }; // + debugLazy
-    Memory.log = { default: "error", modules: { harvester: "debug" } }; // one subsystem loud
-    delete Memory.log; // back to code defaults
-
-### Signage
-    Game.creeps['upgrader-5492007'].signController(Game.rooms['W3S1'].controller, '') # must be within range 1 of the controller
-
-### Memory
-
-## Snippets
+Snippets
