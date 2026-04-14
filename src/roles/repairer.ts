@@ -1,0 +1,153 @@
+import {
+  countRepairBacklog,
+  getRepairTypePriority,
+  isRepairCandidateType,
+} from "../management/repairConfig";
+import { createLogger } from "../logging/logger";
+import { LogLevel } from "../logging/levels";
+import {
+  isStoreEmpty,
+  isStoreFull,
+  resolveSource,
+  transitionState,
+} from "./fsm";
+
+export const LOG_MODULE = "repairer" as const;
+
+const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+
+type RepairerState = "harvest" | "repair";
+
+function ensureState(creep: Creep): RepairerState {
+  if (creep.memory.state !== "harvest" && creep.memory.state !== "repair") {
+    creep.memory.state = "harvest";
+    creep.memory.stateSinceTick = Game.time;
+  }
+  return creep.memory.state === "repair" ? "repair" : "harvest";
+}
+
+/** True if this creep has an in-progress job (hits < 95%) or the room has backlog (hits < 50%). */
+function hasRepairWork(creep: Creep): boolean {
+  const id = creep.memory.repairTargetId;
+  if (id) {
+    const raw = Game.getObjectById(id);
+    if (
+      raw instanceof Structure &&
+      raw.room.name === creep.room.name &&
+      isRepairCandidateType(raw.structureType) &&
+      raw.hits < raw.hitsMax * 0.95
+    ) {
+      return true;
+    }
+  }
+  return countRepairBacklog(creep.room) > 0;
+}
+
+function resolveRepairTarget(creep: Creep): Structure | null {
+  if (creep.memory.repairTargetId) {
+    const raw = Game.getObjectById(creep.memory.repairTargetId);
+    if (
+      raw instanceof Structure &&
+      raw.room.name === creep.room.name &&
+      isRepairCandidateType(raw.structureType)
+    ) {
+      if (raw.hits < raw.hitsMax * 0.95) {
+        return raw;
+      }
+      delete creep.memory.repairTargetId;
+    } else if (raw) {
+      delete creep.memory.repairTargetId;
+    }
+  }
+
+  const candidates = creep.room.find(FIND_STRUCTURES, {
+    filter: (s) =>
+      isRepairCandidateType(s.structureType) && s.hits < s.hitsMax * 0.5,
+  });
+  if (candidates.length === 0) {
+    return null;
+  }
+  candidates.sort((a, b) => {
+    const pa = getRepairTypePriority(a.structureType);
+    const pb = getRepairTypePriority(b.structureType);
+    if (pa !== pb) {
+      return pa - pb;
+    }
+    return creep.pos.getRangeTo(a.pos) - creep.pos.getRangeTo(b.pos);
+  });
+  const best = candidates[0] as Structure;
+  creep.memory.repairTargetId = best.id;
+  return best;
+}
+
+function runHarvest(creep: Creep): void {
+  if (isStoreFull(creep)) {
+    transitionState(creep, "repair");
+    return;
+  }
+  log.path(`${creep.name} branch=empty_carry`);
+  log.debugLazy(
+    () =>
+      `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`,
+  );
+  const source = resolveSource(creep);
+  if (!source) {
+    log.path(`${creep.name} branch=no_active_source`);
+    return;
+  }
+  log.path(`${creep.name} branch=pull_energy`);
+  const result = creep.harvest(source);
+  log.debugLazy(
+    () => `${creep.name} action=harvest source=${source.id} result=${result}`,
+  );
+  if (result === ERR_NOT_IN_RANGE) {
+    const move = creep.moveTo(source);
+    log.path(`${creep.name} branch=harvest_not_in_range`);
+    log.debugLazy(
+      () => `${creep.name} action=moveTo source=${source.id} result=${move}`,
+    );
+  }
+}
+
+function runRepair(creep: Creep): void {
+  if (isStoreEmpty(creep)) {
+    transitionState(creep, "harvest");
+    return;
+  }
+  const target = resolveRepairTarget(creep);
+  if (!target) {
+    log.path(`${creep.name} branch=no_repair_target`);
+    return;
+  }
+  log.path(`${creep.name} branch=repair`);
+  log.debugLazy(
+    () =>
+      `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()} structure=${target.id}`,
+  );
+  const result = creep.repair(target);
+  log.debugLazy(
+    () => `${creep.name} action=repair structure=${target.id} result=${result}`,
+  );
+  if (result === ERR_NOT_IN_RANGE) {
+    const move = creep.moveTo(target);
+    log.path(`${creep.name} branch=repair_not_in_range`);
+    log.debugLazy(
+      () => `${creep.name} action=moveTo structure=${target.id} result=${move}`,
+    );
+  }
+}
+
+export const runRepairer = (creep: Creep): void => {
+  if (!hasRepairWork(creep)) {
+    log.path(`${creep.name} branch=suicide_no_repair_work`);
+    creep.suicide();
+    return;
+  }
+
+  const state = ensureState(creep);
+  if (state === "repair") {
+    runRepair(creep);
+  } else {
+    runHarvest(creep);
+  }
+};
