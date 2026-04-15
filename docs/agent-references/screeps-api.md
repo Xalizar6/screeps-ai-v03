@@ -52,6 +52,7 @@ Common pattern:
 - Upgrading: `creep.upgradeController(controller)`
 - Building: `creep.build(site)`
 - Repair: `creep.repair(structure)`
+- Pickup (dropped resources): `creep.pickup(resource)` — target must be adjacent or on the same tile; requires `CARRY`.
 - Transfer/withdraw:
   - `creep.transfer(target, resourceType)`
   - `creep.withdraw(target, resourceType)`
