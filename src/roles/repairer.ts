@@ -3,6 +3,7 @@ import {
   getRepairTypePriority,
   isRepairCandidateType,
 } from "../management/repairConfig";
+import { getStructures } from "../management/structureCache";
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import { acquireEnergy } from "./energyAcquisition";
@@ -56,10 +57,11 @@ function resolveRepairTarget(creep: Creep): Structure | null {
     }
   }
 
-  const candidates = creep.room.find(FIND_STRUCTURES, {
-    filter: (s) =>
-      isRepairCandidateType(s.structureType) && s.hits < s.hitsMax * 0.5,
-  });
+  const candidates = getStructures(creep.room).filter(
+    (structure) =>
+      isRepairCandidateType(structure.structureType) &&
+      structure.hits < structure.hitsMax * 0.5,
+  );
   if (candidates.length === 0) {
     return null;
   }

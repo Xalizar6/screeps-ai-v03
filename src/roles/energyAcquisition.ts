@@ -72,6 +72,8 @@ function tryActOnCachedTarget(creep: Creep, need: number): boolean {
     | StructureContainer
     | Resource
     | StructureSpawn
+    | StructureExtension
+    | StructureTower
     | ConstructionSite
     | StructureController
   >(creep.memory.targetId);

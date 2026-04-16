@@ -12,6 +12,7 @@ export const LOG_MODULE = "harvester" as const;
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 type HarvesterState = "harvest" | "deliver";
+type FallbackDeliveryTarget = StructureSpawn | StructureExtension;
 
 function ensureState(creep: Creep): HarvesterState {
   if (creep.memory.state !== "harvest" && creep.memory.state !== "deliver") {
@@ -21,72 +22,175 @@ function ensureState(creep: Creep): HarvesterState {
   return creep.memory.state === "deliver" ? "deliver" : "harvest";
 }
 
-function resolveSpawn(creep: Creep): StructureSpawn | null {
+function countRoomShuttles(roomName: string): number {
+  let total = 0;
+  for (const creepName in Game.creeps) {
+    const creep = Game.creeps[creepName];
+    if (
+      creep &&
+      creep.memory.role === "shuttle" &&
+      creep.room.name === roomName &&
+      !creep.spawning
+    ) {
+      total += 1;
+    }
+  }
+  return total;
+}
+
+function resolveAssignedSource(creep: Creep): Source | null {
+  const sourceId = creep.memory.sourceId;
+  if (sourceId) {
+    const assigned = Game.getObjectById(sourceId);
+    if (assigned instanceof Source) {
+      return assigned;
+    }
+    delete creep.memory.sourceId;
+  }
+
+  const fallback = resolveSource(creep);
+  if (fallback) {
+    creep.memory.sourceId = fallback.id;
+  }
+  return fallback;
+}
+
+function resolveSourceContainer(
+  creep: Creep,
+  source: Source,
+): StructureContainer | null {
+  const sourceMem = creep.room.memory.sources?.[source.id];
+  if (!sourceMem?.containerId) {
+    return null;
+  }
+  const container = Game.getObjectById(sourceMem.containerId);
+  if (container instanceof StructureContainer) {
+    return container;
+  }
+  delete sourceMem.containerId;
+  return null;
+}
+
+function resolveFallbackDeliveryTarget(
+  creep: Creep,
+): FallbackDeliveryTarget | null {
   const raw = creep.memory.targetId
     ? Game.getObjectById(creep.memory.targetId)
     : null;
-  if (raw instanceof StructureSpawn) {
+  if (
+    raw &&
+    (raw instanceof StructureSpawn || raw instanceof StructureExtension) &&
+    raw.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+  ) {
     return raw;
   }
   if (raw) {
     delete creep.memory.targetId;
   }
-  const spawn = creep.room.find(FIND_MY_SPAWNS)[0];
-  if (spawn) {
-    creep.memory.targetId = spawn.id;
+
+  const targets = creep.room.find(FIND_MY_STRUCTURES, {
+    filter: (structure): structure is FallbackDeliveryTarget =>
+      (structure.structureType === STRUCTURE_SPAWN ||
+        structure.structureType === STRUCTURE_EXTENSION) &&
+      structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+  });
+  const target = creep.pos.findClosestByPath(targets);
+  if (target) {
+    creep.memory.targetId = target.id;
+    return target;
   }
-  return spawn ?? null;
+  return null;
 }
 
 function runHarvest(creep: Creep): void {
-  if (isStoreFull(creep)) {
+  const shuttleCount = countRoomShuttles(creep.room.name);
+  if (shuttleCount === 0 && isStoreFull(creep)) {
     transitionState(creep, "deliver");
     return;
   }
-  const source = resolveSource(creep);
+
+  const source = resolveAssignedSource(creep);
   if (!source) {
-    log.path(`${creep.name} branch=no_active_source`);
+    log.path(`${creep.name} branch=no_source`);
     return;
   }
-  log.path(`${creep.name} branch=harvest`);
-  log.debugLazy(() => `${creep.name} source=${source.id}`);
-  const result = creep.harvest(source);
-  log.debugLazy(
-    () => `${creep.name} action=harvest source=${source.id} result=${result}`,
-  );
-  if (result === ERR_NOT_IN_RANGE) {
+
+  const container = resolveSourceContainer(creep, source);
+  if (container) {
+    if (!creep.pos.isEqualTo(container.pos)) {
+      const move = creep.moveTo(container);
+      log.path(`${creep.name} branch=move_to_container`);
+      log.debugLazy(
+        () =>
+          `${creep.name} action=moveTo container=${container.id} result=${move}`,
+      );
+      return;
+    }
+  } else if (creep.pos.getRangeTo(source) > 1) {
     const move = creep.moveTo(source);
-    log.path(`${creep.name} branch=harvest_not_in_range`);
+    log.path(`${creep.name} branch=move_to_source`);
     log.debugLazy(
       () => `${creep.name} action=moveTo source=${source.id} result=${move}`,
     );
+    return;
+  }
+
+  log.path(`${creep.name} branch=mine_source`);
+  const harvest = creep.harvest(source);
+  log.debugLazy(
+    () => `${creep.name} action=harvest source=${source.id} result=${harvest}`,
+  );
+
+  const carried = creep.store[RESOURCE_ENERGY];
+  if (carried > 0) {
+    if (container) {
+      const transfer = creep.transfer(container, RESOURCE_ENERGY);
+      log.debugLazy(
+        () =>
+          `${creep.name} action=transfer container=${container.id} amount=${carried} result=${transfer}`,
+      );
+    } else {
+      const dropped = creep.drop(RESOURCE_ENERGY);
+      log.debugLazy(
+        () => `${creep.name} action=drop amount=${carried} result=${dropped}`,
+      );
+    }
+  }
+
+  if (shuttleCount === 0 && isStoreFull(creep)) {
+    transitionState(creep, "deliver");
   }
 }
 
 function runDeliver(creep: Creep): void {
+  if (countRoomShuttles(creep.room.name) > 0) {
+    transitionState(creep, "harvest");
+    return;
+  }
   if (isStoreEmpty(creep)) {
     transitionState(creep, "harvest");
     return;
   }
-  log.path(`${creep.name} branch=full_carry`);
+  log.path(`${creep.name} branch=fallback_deliver`);
   log.debugLazy(
     () =>
       `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`,
   );
-  const spawn = resolveSpawn(creep);
-  if (!spawn) {
-    log.path(`${creep.name} branch=full_carry_no_spawn`);
+  const target = resolveFallbackDeliveryTarget(creep);
+  if (!target) {
+    log.path(`${creep.name} branch=fallback_no_target`);
     return;
   }
-  const result = creep.transfer(spawn, RESOURCE_ENERGY);
+  const result = creep.transfer(target, RESOURCE_ENERGY);
   log.debugLazy(
-    () => `${creep.name} action=transfer target=${spawn.name} result=${result}`,
+    () =>
+      `${creep.name} action=transfer target=${target.id} type=${target.structureType} result=${result}`,
   );
   if (result === ERR_NOT_IN_RANGE) {
-    const move = creep.moveTo(spawn);
-    log.path(`${creep.name} branch=transfer_not_in_range`);
+    const move = creep.moveTo(target);
+    log.path(`${creep.name} branch=fallback_not_in_range`);
     log.debugLazy(
-      () => `${creep.name} action=moveTo target=${spawn.name} result=${move}`,
+      () => `${creep.name} action=moveTo target=${target.id} result=${move}`,
     );
   }
 }
