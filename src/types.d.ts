@@ -14,13 +14,20 @@ type CreepTargetId =
   | Id<Source>
   | Id<StructureSpawn>
   | Id<ConstructionSite>
-  | Id<StructureController>;
+  | Id<StructureController>
+  | Id<StructureContainer>
+  | Id<Resource>;
+
+/** Per-source data cached in `RoomMemory.sources` (see `src/management/roomCache.ts`). */
+interface SourceMemory {
+  containerId?: Id<StructureContainer>;
+}
 
 interface CreepMemory {
   role: "harvester" | "builder" | "upgrader" | "repairer";
   /** Role-local FSM state; see `src/roles/harvester.ts` / `builder.ts` / `upgrader.ts` for valid values per role. */
   state?: RoleFsmStateName;
-  /** Cached target for the current state (source, spawn, or construction site). */
+  /** Cached target for the current state (source, spawn, site, controller, container, or dropped resource). */
   targetId?: CreepTargetId;
   /** `repairer` only: structure being repaired (persists across harvest so 50–95% jobs continue). */
   repairTargetId?: Id<Structure>;
@@ -43,4 +50,6 @@ interface Memory {
 
 interface RoomMemory {
   lastManagedTick?: number;
+  /** Source IDs -> nearby container cache; maintained by `src/management/roomCache.ts`. */
+  sources?: Record<Id<Source>, SourceMemory>;
 }

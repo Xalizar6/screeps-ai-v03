@@ -5,12 +5,8 @@ import {
 } from "../management/repairConfig";
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
-import {
-  isStoreEmpty,
-  isStoreFull,
-  resolveSource,
-  transitionState,
-} from "./fsm";
+import { acquireEnergy } from "./energyAcquisition";
+import { isStoreEmpty, isStoreFull, transitionState } from "./fsm";
 
 export const LOG_MODULE = "repairer" as const;
 
@@ -85,28 +81,7 @@ function runHarvest(creep: Creep): void {
     transitionState(creep, "repair");
     return;
   }
-  log.path(`${creep.name} branch=empty_carry`);
-  log.debugLazy(
-    () =>
-      `${creep.name} energy=${creep.store[RESOURCE_ENERGY]}/${creep.store.getCapacity()}`,
-  );
-  const source = resolveSource(creep);
-  if (!source) {
-    log.path(`${creep.name} branch=no_active_source`);
-    return;
-  }
-  log.path(`${creep.name} branch=pull_energy`);
-  const result = creep.harvest(source);
-  log.debugLazy(
-    () => `${creep.name} action=harvest source=${source.id} result=${result}`,
-  );
-  if (result === ERR_NOT_IN_RANGE) {
-    const move = creep.moveTo(source);
-    log.path(`${creep.name} branch=harvest_not_in_range`);
-    log.debugLazy(
-      () => `${creep.name} action=moveTo source=${source.id} result=${move}`,
-    );
-  }
+  acquireEnergy(creep);
 }
 
 function runRepair(creep: Creep): void {

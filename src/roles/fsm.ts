@@ -38,7 +38,12 @@ export function getObjectByIdOrNull<T extends _HasId>(
  */
 export function resolveSource(creep: Creep): Source | null {
   const raw = getObjectByIdOrNull<
-    Source | StructureSpawn | ConstructionSite | StructureController
+    | Source
+    | StructureSpawn
+    | ConstructionSite
+    | StructureController
+    | StructureContainer
+    | Resource
   >(creep.memory.targetId);
   if (raw instanceof Source) {
     return raw;

@@ -13,6 +13,7 @@ These instructions apply when working in `src/roles/`.
 - Keep role logic as a small **state machine** driven by `CreepMemory` (`state`, optional `targetId`, `stateSinceTick`), not by repeated expensive `find` operations when a cached id is still valid.
 - Put **FSM decisions and per-state handlers** in the role file. Do not centralize all roles into one global state-machine module.
 - Reuse **`src/roles/fsm.ts`** for shared mechanics only: `transitionState`, `isStoreEmpty` / `isStoreFull`, `getObjectByIdOrNull`, `resolveSource` (cached closest active source). Prefer `instanceof Source` / `StructureSpawn` / `ConstructionSite` when resolving `targetId` so wrong types clear the cache.
+- Use **`src/roles/energyAcquisition.ts`** for shared **energy pickup** (`acquireEnergy`): withdraw from source-adjacent containers (when enough energy), pickup dropped energy near sources, then harvest fallback. Room-level source/container IDs live in `RoomMemory.sources` (maintained by `src/management/roomCache.ts`).
 
 ## Memory + caching
 
