@@ -1,3 +1,5 @@
+import { getStructures } from "./structureCache";
+
 /**
  * Repairable structure types and priority order (first = highest priority when choosing targets).
  * Extend `REPAIR_STRUCTURE_TYPE_ORDER` when adding towers, walls, etc.
@@ -26,8 +28,15 @@ export function getRepairTypePriority(
 
 /** Structures that need new repair assignments (strict entry: below 50% hits). */
 export function countRepairBacklog(room: Room): number {
-  return room.find(FIND_STRUCTURES, {
-    filter: (s) =>
-      isRepairCandidateType(s.structureType) && s.hits < s.hitsMax * 0.5,
-  }).length;
+  const structures = getStructures(room);
+  let count = 0;
+  for (const structure of structures) {
+    if (
+      isRepairCandidateType(structure.structureType) &&
+      structure.hits < structure.hitsMax * 0.5
+    ) {
+      count++;
+    }
+  }
+  return count;
 }
