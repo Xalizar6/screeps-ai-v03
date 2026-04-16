@@ -1,6 +1,7 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import { countRepairBacklog } from "./repairConfig";
+import { getUnfilledEnergyStructures } from "./structureCache";
 
 export const LOG_MODULE = "spawnManager" as const;
 
@@ -36,6 +37,25 @@ export const runSpawnManagement = (): void => {
       log.debugLazy(
         () =>
           `spawn=${spawn.name} branch=harvester have=${harvesters.length} need=2 bodyCost=${bodyCost(
+            DEFAULT_BODY,
+          )} energy=${spawn.room.energyAvailable} code=${code}`,
+      );
+      continue;
+    }
+
+    const shuttles = Object.values(Game.creeps).filter(
+      (creep): creep is Creep =>
+        creep !== undefined && creep.memory.role === "shuttle",
+    );
+    const unfilled = getUnfilledEnergyStructures(spawn.room);
+    const desiredShuttles = Math.max(1, Math.ceil(unfilled.length / 4));
+    if (shuttles.length < desiredShuttles) {
+      const code = spawn.spawnCreep(DEFAULT_BODY, `shuttle-${Game.time}`, {
+        memory: { role: "shuttle" },
+      });
+      log.debugLazy(
+        () =>
+          `spawn=${spawn.name} branch=shuttle have=${shuttles.length} desired=${desiredShuttles} unfilled=${unfilled.length} bodyCost=${bodyCost(
             DEFAULT_BODY,
           )} energy=${spawn.room.energyAvailable} code=${code}`,
       );

@@ -5,10 +5,17 @@ import {
   runRoomConstruction,
 } from "./roomConstruction";
 import { LOG_MODULE as roomCacheModule, runRoomCache } from "./roomCache";
+import {
+  LOG_MODULE as structureCacheModule,
+  runStructureCache,
+} from "./structureCache";
 
 export const LOG_MODULE = "roomManager" as const;
 
 const roomCacheLogger = createLogger(roomCacheModule, {
+  defaultLevel: LogLevel.Information,
+});
+const structureCacheLogger = createLogger(structureCacheModule, {
   defaultLevel: LogLevel.Information,
 });
 
@@ -22,6 +29,9 @@ export const runRoomManagement = (): void => {
     room.memory.lastManagedTick = Game.time;
     roomCacheLogger.moduleScope("runRoomCache", () => {
       runRoomCache(room);
+    });
+    structureCacheLogger.moduleScope("runStructureCache", () => {
+      runStructureCache(room);
     });
     if (runConstructionPlan) {
       runRoomConstruction(room);

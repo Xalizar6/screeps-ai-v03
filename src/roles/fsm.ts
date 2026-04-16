@@ -40,6 +40,8 @@ export function resolveSource(creep: Creep): Source | null {
   const raw = getObjectByIdOrNull<
     | Source
     | StructureSpawn
+    | StructureExtension
+    | StructureTower
     | ConstructionSite
     | StructureController
     | StructureContainer

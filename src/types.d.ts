@@ -2,17 +2,21 @@ type HarvesterFsmState = "harvest" | "deliver";
 type BuilderFsmState = "harvest" | "build";
 type UpgraderFsmState = "harvest" | "upgrade";
 type RepairerFsmState = "harvest" | "repair";
+type ShuttleFsmState = "harvest" | "deliver";
 
 /** Union of role-local states; each role only uses its subset. */
 type RoleFsmStateName =
   | HarvesterFsmState
   | BuilderFsmState
   | UpgraderFsmState
-  | RepairerFsmState;
+  | RepairerFsmState
+  | ShuttleFsmState;
 
 type CreepTargetId =
   | Id<Source>
   | Id<StructureSpawn>
+  | Id<StructureExtension>
+  | Id<StructureTower>
   | Id<ConstructionSite>
   | Id<StructureController>
   | Id<StructureContainer>
@@ -24,7 +28,7 @@ interface SourceMemory {
 }
 
 interface CreepMemory {
-  role: "harvester" | "builder" | "upgrader" | "repairer";
+  role: "harvester" | "builder" | "upgrader" | "repairer" | "shuttle";
   /** Role-local FSM state; see `src/roles/harvester.ts` / `builder.ts` / `upgrader.ts` for valid values per role. */
   state?: RoleFsmStateName;
   /** Cached target for the current state (source, spawn, site, controller, container, or dropped resource). */

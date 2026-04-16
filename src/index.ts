@@ -15,6 +15,7 @@ import {
 import { LOG_MODULE as builderModule, runBuilder } from "./roles/builder";
 import { LOG_MODULE as harvesterModule, runHarvester } from "./roles/harvester";
 import { LOG_MODULE as repairerModule, runRepairer } from "./roles/repairer";
+import { LOG_MODULE as shuttleModule, runShuttle } from "./roles/shuttle";
 import { LOG_MODULE as upgraderModule, runUpgrader } from "./roles/upgrader";
 
 const loopLogger = createLogger("mainLoop", {
@@ -39,6 +40,9 @@ const upgraderLogger = createLogger(upgraderModule, {
   defaultLevel: LogLevel.Information,
 });
 const repairerLogger = createLogger(repairerModule, {
+  defaultLevel: LogLevel.Information,
+});
+const shuttleLogger = createLogger(shuttleModule, {
   defaultLevel: LogLevel.Information,
 });
 
@@ -95,6 +99,20 @@ export const loop = (): void => {
           }
         },
         () => ({ creeps: countCreepsByRole("upgrader") }),
+      );
+
+      shuttleLogger.moduleScope(
+        "rolePass",
+        () => {
+          for (const name in Game.creeps) {
+            const creep = Game.creeps[name];
+            if (!creep || creep.memory.role !== "shuttle") {
+              continue;
+            }
+            runShuttle(creep);
+          }
+        },
+        () => ({ creeps: countCreepsByRole("shuttle") }),
       );
 
       builderLogger.moduleScope(
