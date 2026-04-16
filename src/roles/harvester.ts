@@ -135,6 +135,14 @@ function runHarvest(creep: Creep): void {
     return;
   }
 
+  const containerHasRoom =
+    !container || container.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+  const carryHasRoom = !isStoreFull(creep);
+  if (!containerHasRoom && !carryHasRoom) {
+    log.path(`${creep.name} branch=idle_container_full`);
+    return;
+  }
+
   log.path(`${creep.name} branch=mine_source`);
   const harvest = creep.harvest(source);
   log.debugLazy(
