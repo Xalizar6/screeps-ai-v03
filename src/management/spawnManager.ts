@@ -8,6 +8,41 @@ export const LOG_MODULE = "spawnManager" as const;
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
+const HARVESTER_BODY: BodyPartConstant[] = [WORK, WORK, CARRY, MOVE];
+
+function pickUnclaimedSourceId(
+  room: Room,
+  harvesters: Creep[],
+): Id<Source> | undefined {
+  const sourcesMem = room.memory.sources;
+  if (!sourcesMem) {
+    return undefined;
+  }
+
+  const claimed = new Set<Id<Source>>();
+  for (const harvester of harvesters) {
+    const sourceId = harvester.memory.sourceId;
+    if (sourceId) {
+      claimed.add(sourceId);
+    }
+  }
+
+  for (const sourceIdStr of Object.keys(sourcesMem)) {
+    const sourceId = sourceIdStr as Id<Source>;
+    if (!claimed.has(sourceId)) {
+      return sourceId;
+    }
+  }
+  return undefined;
+}
+
+function getDesiredHarvesterCount(room: Room): number {
+  const cachedSources = room.memory.sources;
+  if (cachedSources) {
+    return Object.keys(cachedSources).length;
+  }
+  return room.find(FIND_SOURCES).length;
+}
 
 export const runSpawnManagement = (): void => {
   for (const spawnName in Game.spawns) {
@@ -27,18 +62,22 @@ export const runSpawnManagement = (): void => {
 
     const harvesters = Object.values(Game.creeps).filter(
       (creep): creep is Creep =>
-        creep !== undefined && creep.memory.role === "harvester",
+        creep !== undefined &&
+        creep.memory.role === "harvester" &&
+        creep.room.name === spawn.room.name,
     );
+    const desiredHarvesters = getDesiredHarvesterCount(spawn.room);
 
-    if (harvesters.length < 2) {
-      const code = spawn.spawnCreep(DEFAULT_BODY, `harvester-${Game.time}`, {
-        memory: { role: "harvester" },
+    if (harvesters.length < desiredHarvesters) {
+      const sourceId = pickUnclaimedSourceId(spawn.room, harvesters);
+      const code = spawn.spawnCreep(HARVESTER_BODY, `harvester-${Game.time}`, {
+        memory: { role: "harvester", sourceId },
       });
       log.debugLazy(
         () =>
-          `spawn=${spawn.name} branch=harvester have=${harvesters.length} need=2 bodyCost=${bodyCost(
-            DEFAULT_BODY,
-          )} energy=${spawn.room.energyAvailable} code=${code}`,
+          `spawn=${spawn.name} branch=harvester have=${harvesters.length} need=${desiredHarvesters} bodyCost=${bodyCost(
+            HARVESTER_BODY,
+          )} energy=${spawn.room.energyAvailable} sourceId=${sourceId ?? "none"} code=${code}`,
       );
       continue;
     }

@@ -29,6 +29,8 @@ interface SourceMemory {
 
 interface CreepMemory {
   role: "harvester" | "builder" | "upgrader" | "repairer" | "shuttle";
+  /** `harvester` primary source assignment to keep a stable miner/source pairing. */
+  sourceId?: Id<Source>;
   /** Role-local FSM state; see `src/roles/harvester.ts` / `builder.ts` / `upgrader.ts` for valid values per role. */
   state?: RoleFsmStateName;
   /** Cached target for the current state (source, spawn, site, controller, container, or dropped resource). */
