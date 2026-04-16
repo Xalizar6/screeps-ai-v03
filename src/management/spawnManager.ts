@@ -8,6 +8,7 @@ export const LOG_MODULE = "spawnManager" as const;
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
+const SHUTTLE_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE, MOVE];
 const HARVESTER_BODY: BodyPartConstant[] = [WORK, WORK, CARRY, MOVE];
 
 function pickUnclaimedSourceId(
@@ -84,18 +85,20 @@ export const runSpawnManagement = (): void => {
 
     const shuttles = Object.values(Game.creeps).filter(
       (creep): creep is Creep =>
-        creep !== undefined && creep.memory.role === "shuttle",
+        creep !== undefined &&
+        creep.memory.role === "shuttle" &&
+        creep.room.name === spawn.room.name,
     );
     const unfilled = getUnfilledEnergyStructures(spawn.room);
     const desiredShuttles = Math.max(1, Math.ceil(unfilled.length / 4));
     if (shuttles.length < desiredShuttles) {
-      const code = spawn.spawnCreep(DEFAULT_BODY, `shuttle-${Game.time}`, {
+      const code = spawn.spawnCreep(SHUTTLE_BODY, `shuttle-${Game.time}`, {
         memory: { role: "shuttle" },
       });
       log.debugLazy(
         () =>
           `spawn=${spawn.name} branch=shuttle have=${shuttles.length} desired=${desiredShuttles} unfilled=${unfilled.length} bodyCost=${bodyCost(
-            DEFAULT_BODY,
+            SHUTTLE_BODY,
           )} energy=${spawn.room.energyAvailable} code=${code}`,
       );
       continue;
