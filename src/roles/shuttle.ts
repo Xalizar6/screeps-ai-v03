@@ -1,3 +1,4 @@
+import { DEFAULT_SHUTTLE_PROFILE_ID } from "../management/shuttleDemand";
 import { getUnfilledEnergyStructures } from "../management/structureCache";
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
@@ -24,14 +25,31 @@ type DeliveryTarget =
   | StructureTower
   | StructureContainer;
 
-type ShuttleState = "harvest" | "deliver";
+type ShuttleState = "harvest" | "deliver" | "deliverController";
 
+const SHUTTLE_STATES: ReadonlySet<ShuttleState> = new Set([
+  "harvest",
+  "deliver",
+  "deliverController",
+]);
+
+/**
+ * Ensures shuttle FSM state and profile metadata are valid for this role.
+ * @remarks Does not touch `creep.store`; safe at handler entry for intent timing.
+ */
 function ensureState(creep: Creep): ShuttleState {
-  if (creep.memory.state !== "harvest" && creep.memory.state !== "deliver") {
+  if (
+    creep.memory.role === "shuttle" &&
+    creep.memory.shuttleProfileId === undefined
+  ) {
+    creep.memory.shuttleProfileId = DEFAULT_SHUTTLE_PROFILE_ID;
+  }
+  if (!SHUTTLE_STATES.has(creep.memory.state as ShuttleState)) {
     creep.memory.state = "harvest";
     creep.memory.stateSinceTick = Game.time;
   }
-  return creep.memory.state === "deliver" ? "deliver" : "harvest";
+  const s = creep.memory.state as ShuttleState;
+  return s === "deliver" || s === "deliverController" ? s : "harvest";
 }
 
 function isDeliveryTarget(
@@ -42,6 +60,15 @@ function isDeliveryTarget(
     structure.structureType === STRUCTURE_EXTENSION ||
     structure.structureType === STRUCTURE_TOWER
   );
+}
+
+/**
+ * Returns true when spawn, extensions, or towers still accept energy (shuttle must serve these first).
+ * @param room Room to inspect (uses same-tick structure cache)
+ */
+function hasPriorityInfrastructureDemand(room: Room): boolean {
+  const unfilled = getUnfilledEnergyStructures(room);
+  return unfilled.length > 0;
 }
 
 function resolveControllerContainer(room: Room): StructureContainer | null {
@@ -121,9 +148,58 @@ function resolveDeliveryTarget(creep: Creep): DeliveryTarget | null {
   return null;
 }
 
+/**
+ * Resolves the controller buffer container for delivery-only state (no spawn/extension/tower pass).
+ */
+function resolveControllerDeliveryTarget(
+  creep: Creep,
+): StructureContainer | null {
+  const raw = getObjectByIdOrNull<
+    | Source
+    | StructureSpawn
+    | StructureExtension
+    | StructureTower
+    | ConstructionSite
+    | StructureController
+    | StructureContainer
+    | Resource
+  >(creep.memory.targetId);
+  const controllerContainerId = creep.room.memory.controllerContainerId;
+  if (
+    raw instanceof StructureContainer &&
+    controllerContainerId &&
+    raw.id === controllerContainerId &&
+    raw.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+  ) {
+    return raw;
+  }
+  if (raw) {
+    delete creep.memory.targetId;
+  }
+  const container = resolveControllerContainer(creep.room);
+  if (container) {
+    creep.memory.targetId = container.id;
+    return container;
+  }
+  return null;
+}
+
+/**
+ * Picks harvest vs delivery state after the creep is full; prefers controller-only delivery when no higher-priority sinks need energy.
+ * @remarks Uses only handler-entry `isStoreFull`; no post-withdraw same-tick store checks.
+ */
+function transitionFromFullStore(creep: Creep): void {
+  const controller = resolveControllerContainer(creep.room);
+  if (!hasPriorityInfrastructureDemand(creep.room) && controller) {
+    transitionState(creep, "deliverController");
+    return;
+  }
+  transitionState(creep, "deliver");
+}
+
 function runHarvest(creep: Creep): void {
   if (isStoreFull(creep)) {
-    transitionState(creep, "deliver");
+    transitionFromFullStore(creep);
     return;
   }
   acquireEnergy(creep);
@@ -133,6 +209,13 @@ function runDeliver(creep: Creep): void {
   if (isStoreEmpty(creep)) {
     transitionState(creep, "harvest");
     return;
+  }
+  if (hasPriorityInfrastructureDemand(creep.room) === false) {
+    const controller = resolveControllerContainer(creep.room);
+    if (controller) {
+      transitionState(creep, "deliverController");
+      return;
+    }
   }
   log.path(`${creep.name} branch=deliver`);
   const target = resolveDeliveryTarget(creep);
@@ -154,12 +237,45 @@ function runDeliver(creep: Creep): void {
   }
 }
 
+/**
+ * Delivers only to the controller buffer container; pivots to `deliver` if spawn/extensions/towers need energy.
+ * @remarks Transfer return codes do not gate FSM transitions; empty/full checks run at handler entry only.
+ */
+function runDeliverController(creep: Creep): void {
+  if (isStoreEmpty(creep)) {
+    transitionState(creep, "harvest");
+    return;
+  }
+  if (hasPriorityInfrastructureDemand(creep.room)) {
+    transitionState(creep, "deliver");
+    return;
+  }
+  log.path(`${creep.name} branch=deliver_controller`);
+  const target = resolveControllerDeliveryTarget(creep);
+  if (!target) {
+    log.path(`${creep.name} branch=deliver_controller_no_target`);
+    transitionState(creep, "harvest");
+    return;
+  }
+  const result = creep.transfer(target, RESOURCE_ENERGY);
+  log.debugLazy(
+    () =>
+      `${creep.name} action=transfer target=${target.id} type=controller_container result=${result}`,
+  );
+  if (result === ERR_NOT_IN_RANGE) {
+    creep.moveTo(target);
+    log.path(`${creep.name} branch=deliver_controller_not_in_range`);
+  }
+}
+
 /** Main loop entry: acquire energy or deliver to structures, with same-tick re-dispatch after FSM transitions. */
 export const runShuttle = (creep: Creep): void => {
   runFsm(creep, () => {
     const state = ensureState(creep);
     if (state === "deliver") {
       runDeliver(creep);
+    } else if (state === "deliverController") {
+      runDeliverController(creep);
     } else {
       runHarvest(creep);
     }

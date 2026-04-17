@@ -41,6 +41,15 @@ Use this template after each pilot-skill task:
 - Token efficiency observations: Short skill files pointed at workflow without needing full `references/` reads for this change.
 - Follow-up tuning: none
 
+### 2026-04-17 - Demand-based shuttle scaling for controller supply
+
+- Skill used: `adding-a-creep-role`, `checking-screeps-api`
+- Auto-invoked: no
+- False-positive invocation: no
+- Missed steps prevented: Room-scoped upgrader `WORK` sum + smoothed structure deficit for spawn targets; shuttle FSM uses `isStoreFull` / `isStoreEmpty` only at handler entry (no post-`transfer` store gates); `shuttleProfileId` + `deliverController` state wired in `types` / spawn memory.
+- Token efficiency observations: Throughput model uses `RoomMemory` ids and `Game.creeps` scan (no per-tick pathing); `getUnfilledEnergyStructures` stays on existing structure cache.
+- Follow-up tuning: Tune `SHUTTLE_BASE_ROUND_TRIP_TICKS` / caps from live metrics; extend `SHUTTLE_PROFILE_BODIES` when new shuttle bodies ship.
+
 ## Exit Criteria for Pilot
 
 - Pilot skills auto-invoke reliably for expected prompts.
