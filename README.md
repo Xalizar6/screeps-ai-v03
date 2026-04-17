@@ -40,9 +40,14 @@ For behavior-change safety (intents, return codes): **`/checking-screeps-api`**.
 
 ## Scripts
 
-- `npm run build` — bundle to `dist/`
-- `npm run typecheck` / `npm run lint` — quality checks
-- `npm run deploy` — build and upload (requires Screeps credentials; see [`.env.example`](.env.example))
+- `npm run typecheck` — TypeScript (`tsc --noEmit`)
+- `npm run watch` — `tsc --noEmit --watch` (typecheck while editing)
+- `npm run lint` / `npm run lint:fix` — ESLint; `--fix` applies safe fixes
+- `npm run format:check` / `npm run format` — Prettier check vs write
+- `npm run fix` — `lint:fix` then `format` (one-shot cleanup)
+- `npm run build` — `lint`, `format:check`, `typecheck`, then bundle to `dist/` via [`scripts/build.js`](scripts/build.js)
+- `npm run upload` — upload `dist/` only (uses [`scripts/run-upload.js`](scripts/run-upload.js); credentials: [`.env.example`](.env.example))
+- `npm run deploy` — `build` then `upload`
 
 Full verify/build/CI workflow: skill **`/building-and-deploying-screeps`** ([`.agents/skills/building-and-deploying-screeps/`](.agents/skills/building-and-deploying-screeps/)).
 
