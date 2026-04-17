@@ -20,6 +20,9 @@ This folder is a **shared reference library** for agents working in this repo.
   - When you need exact API behavior (e.g. `Game.getObjectById`, `Room.find`, `Creep` actions, return codes).
   - When implementing a new behavior and want the correct primitive calls.
 
+- `external-example-codebases.md`
+  - When you want **optional pointers** to other open-source Screeps AIs (bonzAI, Overmind, Nooby Guide) for patterns and vocabulary — not mirrored here; adapt to this repo’s standards.
+
 ## How we use references in this repo
 
 - Prefer **IDs in memory** + `Game.getObjectById(...)` over repeated searches in hot loops.

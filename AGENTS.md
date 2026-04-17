@@ -90,6 +90,7 @@ When you need Screeps gameplay or API details, consult the shared reference libr
 - `docs/agent-references/README.md`
 - `docs/agent-references/screeps-overview.md`
 - `docs/agent-references/screeps-api.md`
+- `docs/agent-references/external-example-codebases.md` (optional third-party example bots; not part of this repo)
 
 Canonical Screeps docs: `https://docs.screeps.com/index.html` and API reference `https://docs.screeps.com/api/`.
 
