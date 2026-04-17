@@ -9,6 +9,16 @@ Screeps World AI created with AI agent assistance.
 - Personal growth in handling a larger multi-file codebase instead of small scripts.
 - Gradually build an advanced Screeps World AI framework with a human-in-the-loop process for review and learning.
 
+## Using Skills (Quick Start)
+
+Project workflows live under [`.agents/skills/`](.agents/skills/) (each folder has a `SKILL.md`). Cursor discovers them for this workspace (**Settings → Rules → Skills**).
+
+- Open **Agent** chat and type **`/`** to search and invoke a skill by name.
+- Manual invocation (recommended for safety-critical work): **`/adding-a-creep-role`**, **`/checking-screeps-api`**
+- After a run you care to track, append an entry to the **Pilot Log** in [`docs/skills/README.md`](docs/skills/README.md).
+
+Full **skill catalog**, **slash commands**, trigger phrases, and a short **practice routine**: [`docs/skills/README.md`](docs/skills/README.md).
+
 ## Architecture (creep roles)
 
 - **Main loop** (`src/index.ts`): room/spawn management, then per-role passes over `Game.creeps`.
