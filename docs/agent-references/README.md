@@ -4,6 +4,7 @@ This folder is a **shared reference library** for agents working in this repo.
 
 - **Repo rules live elsewhere**: follow the various `AGENTS.md` files for repo-specific conventions.
 - **These docs are supporting material**: use them when you need Screeps gameplay/API detail or project patterns.
+- **Workflow lives in skills**: use `.agents/skills/` for process checklists; use this folder for Screeps facts and behavior references.
 
 ## Canonical Screeps documentation
 

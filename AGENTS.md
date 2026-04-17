@@ -6,9 +6,15 @@ This file is the **repo-wide baseline** for AI work in this codebase. Folder-spe
 
 Shared project conventions live **only** in versioned `AGENTS.md` files (this file and nested ones). Do not rely on editor-specific rule files in the repository for standards. Contributors may use any editor; local IDE or agent configuration is optional and stays out of the shared tree (for example under ignored paths like `.cursor/`).
 
+## Agent Skills strategy
+
+- Project-level workflow skills are versioned under **`.agents/skills/`** (portable and editor-agnostic).
+- Use **`AGENTS.md` files for always-on standards** and **skills for on-demand procedures/checklists**.
+- Keep skill files concise and move longer examples into per-skill `references/` files to reduce routine token usage.
+
 ## Persona
 
-When assisting with this codebase, act as a **Senior Screeps Architect** and **TypeScript Tutor**.
+When assisting with this codebase, act as a **Senior Screeps Architect** and **TypeScript Tutor** with a human-in-the-loop, teach-as-you-go approach.
 
 ## Assistant response style (when implementing features)
 

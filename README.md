@@ -2,6 +2,13 @@
 
 Screeps World AI created with AI agent assistance.
 
+## Project Goals
+
+- Personal growth in using AI agents and the latest AI-assisted software development features.
+- Personal growth in learning JavaScript and TypeScript through real implementation work.
+- Personal growth in handling a larger multi-file codebase instead of small scripts.
+- Gradually build an advanced Screeps World AI framework with a human-in-the-loop process for review and learning.
+
 ## Architecture (creep roles)
 
 - **Main loop** (`src/index.ts`): room/spawn management, then per-role passes over `Game.creeps`.
@@ -9,11 +16,16 @@ Screeps World AI created with AI agent assistance.
 - **FSM helpers** (`src/roles/fsm.ts`): shared pure functions only (`isStoreEmpty`, `isStoreFull`, `transitionState`, `getObjectByIdOrNull`). No `Creep.prototype` extensions for trivial checks.
 - **Types** (`src/types.d.ts`): extend `CreepMemory` when adding states or persisted ids.
 
-To add a role: add `runYourRole(creep)`, extend `CreepMemory.role` / state fields, wire the role pass in `src/index.ts`, and export `LOG_MODULE` per `src/roles/AGENTS.md`.
+To add or evolve a role, use the project skill at `.agents/skills/adding-a-creep-role/SKILL.md` for the full cross-file checklist.
 
 ## Logging
 
 Logging lives in `src/logging/` (`createLogger`, levels, `Memory.log` resolution). Lines look like `[tick=…][moduleId][TAG] …`. Types for `Memory.log` are in `src/types.d.ts`.
+
+For operational logging workflow and behavior-change safety checks, use:
+
+- `.agents/skills/checking-screeps-api/SKILL.md`
+- `.agents/skills/adding-a-creep-role/SKILL.md` (for role/FSM-related logging expectations)
 
 **Levels** (strings in `Memory`, numbers in code): `error` → `information` → `verbose` → `debug`. Roughly: errors only; then `info` / `stat` / one **`moduleScope`** summary per block (includes **CPU ms** via `Game.cpu.getUsed()`—not `Game.time`, which is fixed inside a tick); then `path`; then `debugLazy` (callback skipped when off). Effective level: `Memory.log.modules[id]` → `Memory.log.default` → `createLogger`’s `defaultLevel`. Bad strings are ignored. Each logger caches the resolved level once per tick.
 
