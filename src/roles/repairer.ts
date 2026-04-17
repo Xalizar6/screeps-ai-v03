@@ -7,7 +7,7 @@ import { getStructures } from "../management/structureCache";
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import { acquireEnergy } from "./energyAcquisition";
-import { isStoreEmpty, isStoreFull, transitionState } from "./fsm";
+import { isStoreEmpty, isStoreFull, runFsm, transitionState } from "./fsm";
 
 export const LOG_MODULE = "repairer" as const;
 
@@ -114,6 +114,7 @@ function runRepair(creep: Creep): void {
   }
 }
 
+/** Main loop entry: acquire energy or repair structures, with same-tick re-dispatch after FSM transitions. */
 export const runRepairer = (creep: Creep): void => {
   if (!hasRepairWork(creep)) {
     log.path(`${creep.name} branch=suicide_no_repair_work`);
@@ -121,10 +122,12 @@ export const runRepairer = (creep: Creep): void => {
     return;
   }
 
-  const state = ensureState(creep);
-  if (state === "repair") {
-    runRepair(creep);
-  } else {
-    runHarvest(creep);
-  }
+  runFsm(creep, () => {
+    const state = ensureState(creep);
+    if (state === "repair") {
+      runRepair(creep);
+    } else {
+      runHarvest(creep);
+    }
+  });
 };

@@ -1,7 +1,7 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import { acquireEnergy } from "./energyAcquisition";
-import { isStoreEmpty, isStoreFull, transitionState } from "./fsm";
+import { isStoreEmpty, isStoreFull, runFsm, transitionState } from "./fsm";
 
 export const LOG_MODULE = "upgrader" as const;
 
@@ -73,11 +73,14 @@ function runUpgrade(creep: Creep): void {
   }
 }
 
+/** Main loop entry: acquire energy or upgrade the controller, with same-tick re-dispatch after FSM transitions. */
 export const runUpgrader = (creep: Creep): void => {
-  const state = ensureState(creep);
-  if (state === "upgrade") {
-    runUpgrade(creep);
-  } else {
-    runHarvest(creep);
-  }
+  runFsm(creep, () => {
+    const state = ensureState(creep);
+    if (state === "upgrade") {
+      runUpgrade(creep);
+    } else {
+      runHarvest(creep);
+    }
+  });
 };

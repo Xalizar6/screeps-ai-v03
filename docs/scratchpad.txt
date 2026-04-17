@@ -31,6 +31,7 @@ Screeps console commands
         Memory.log = { default: "verbose" }; // + path
         Memory.log = { default: "debug" }; // + debugLazy
         Memory.log = { default: "error", modules: {spawnManager: "debug" } }; // one subsystem loud
+        Memory.log = { default: "error", modules: {shuttle: "debug", energyAcquisition: "debug", } }; // one subsystem loud
         delete Memory.log; // back to code defaults
 
     Signage

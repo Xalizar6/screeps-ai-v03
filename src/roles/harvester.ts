@@ -4,6 +4,7 @@ import {
   isStoreEmpty,
   isStoreFull,
   resolveSource,
+  runFsm,
   transitionState,
 } from "./fsm";
 
@@ -203,11 +204,14 @@ function runDeliver(creep: Creep): void {
   }
 }
 
+/** Main loop entry: mine at source (or fallback deliver), with same-tick re-dispatch after FSM transitions. */
 export const runHarvester = (creep: Creep): void => {
-  const state = ensureState(creep);
-  if (state === "deliver") {
-    runDeliver(creep);
-  } else {
-    runHarvest(creep);
-  }
+  runFsm(creep, () => {
+    const state = ensureState(creep);
+    if (state === "deliver") {
+      runDeliver(creep);
+    } else {
+      runHarvest(creep);
+    }
+  });
 };

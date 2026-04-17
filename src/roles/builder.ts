@@ -1,7 +1,7 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import { acquireEnergy } from "./energyAcquisition";
-import { isStoreEmpty, isStoreFull, transitionState } from "./fsm";
+import { isStoreEmpty, isStoreFull, runFsm, transitionState } from "./fsm";
 
 export const LOG_MODULE = "builder" as const;
 
@@ -70,6 +70,7 @@ function runBuild(creep: Creep): void {
   }
 }
 
+/** Main loop entry: harvest energy or build construction sites, with same-tick re-dispatch after FSM transitions. */
 export const runBuilder = (creep: Creep): void => {
   if (creep.room.find(FIND_CONSTRUCTION_SITES).length === 0) {
     log.path(`${creep.name} branch=suicide_no_construction_sites`);
@@ -77,10 +78,12 @@ export const runBuilder = (creep: Creep): void => {
     return;
   }
 
-  const state = ensureState(creep);
-  if (state === "build") {
-    runBuild(creep);
-  } else {
-    runHarvest(creep);
-  }
+  runFsm(creep, () => {
+    const state = ensureState(creep);
+    if (state === "build") {
+      runBuild(creep);
+    } else {
+      runHarvest(creep);
+    }
+  });
 };

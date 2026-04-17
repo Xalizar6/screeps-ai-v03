@@ -35,8 +35,13 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
 
 - **Creep behavior (finite state machines)**
   - Each role in `src/roles/` owns its FSM: states, transitions, and per-state actions live in that role file (not in one shared cross-role machine).
-  - Shared **helpers only** live in `src/roles/fsm.ts` (store checks, `transitionState`, `getObjectByIdOrNull`). Do not extend `Creep.prototype` for simple guards; prefer pure helpers.
+  - Shared **helpers only** live in `src/roles/fsm.ts` (store checks, `transitionState`, `runFsm`, `getObjectByIdOrNull`). Do not extend `Creep.prototype` for simple guards; prefer pure helpers.
   - Persist `CreepMemory.state`, optional `targetId`, and `stateSinceTick` via `src/types.d.ts`; resolve cached IDs with `instanceof` or null checks so stale targets are cleared.
+
+- **Documentation in code (JSDoc)**
+  - Every **exported** function and every **non-trivial internal** function should have at least a one-line JSDoc summary describing what it does and why it exists.
+  - When parameters, return values, or side effects are non-obvious, add `@param` / `@returns` (or a short note on side effects). Prefer intent over repeating the implementation line-by-line.
+  - Trivial one-liners may omit `@param` / `@returns` but should still carry the summary line. Update JSDoc when behavior changes.
 
 - **Logging** — Use `src/logging/` (`createLogger`, `moduleScope`, levels). Full conventions, `LOG_MODULE` export rules, `Memory.log`, and level semantics: **`src/logging/AGENTS.md`**.
 
@@ -71,5 +76,9 @@ When you need Screeps gameplay or API details, consult the shared reference libr
 - `docs/agent-references/README.md`
 - `docs/agent-references/screeps-overview.md`
 - `docs/agent-references/screeps-api.md`
+
+Canonical Screeps docs: `https://docs.screeps.com/index.html` and API reference `https://docs.screeps.com/api/`.
+
+Before changing creep actions, intents, CPU usage, or memory contracts, **read the linked references first** (local notes plus canonical API when behavior is not spelled out in-repo). Do not assume intent rules (for example one intent per action type per tick, movement as a separate intent, or return codes such as `ERR_BUSY` / `ERR_NOT_IN_RANGE`). If a change depends on exact API behavior and local notes do not cover it, confirm against `https://docs.screeps.com/api/` and cite that source in plans or PRs.
 
 Use these as supporting references, but follow this `AGENTS.md` file for **repo-specific standards**.

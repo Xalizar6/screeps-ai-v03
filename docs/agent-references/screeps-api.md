@@ -46,6 +46,20 @@ Common pattern:
 - If `ERR_NOT_IN_RANGE`, `creep.moveTo(target)` (or your project’s movement helper)
 - If invalid target, clear cached ID and re-select
 
+## Intent timing and `creep.store` within a tick
+
+Screeps actions are **intents** queued on the creep and resolved at end-of-tick (see [game loop](https://docs.screeps.com/game-loop.html) and [API](https://docs.screeps.com/api/)). Practical implications for role logic:
+
+- After `creep.transfer(...)`, `creep.withdraw(...)`, or `creep.pickup(...)` returns `OK`, `creep.store` is **not guaranteed** to reflect the change within the same tick. Gating a state transition on `isStoreEmpty` / `isStoreFull` immediately after the call is unreliable on the official server — the check often reflects the **pre-intent** value.
+- `creep.harvest(...)` often reflects gained energy in `creep.store` same-tick in practice, but do not assume cross-action consistency; prefer patterns that work regardless.
+- **Safe pattern:** run store-based transition checks at the **top of the handler** (tick N+1, after end-of-tick resolution). Combined with `runFsm`’s same-tick re-dispatch in `src/roles/fsm.ts`, the new-state handler can still issue `moveTo` in the same tick it transitions.
+- **Unsafe pattern:** `if (result === OK && isStoreEmpty(creep)) transitionState(...)` immediately after `creep.transfer`. This was tried for the shuttle deliver path and did not fire on the official server because `store` had not yet updated.
+- If a same-tick post-action pivot is ever required, the only reliable signal is a **pre-computed delta** from the action’s inputs (for example, comparing creep carry to target free capacity before calling `transfer`). That approach has its own fragility (target state can change mid-tick) and is not used in this repo today.
+
+### Observability: `fsm` transition logs
+
+`transitionState` logs under the `fsm` module at `path` (verbose+). To see `[fsm][PATH] state=...` lines, set `Memory.log.modules.fsm = "verbose"` or raise `Memory.log.default` (see `src/logging/AGENTS.md`).
+
 ## Common action primitives
 
 - Harvesting: `creep.harvest(source)`
