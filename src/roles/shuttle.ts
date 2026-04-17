@@ -6,6 +6,7 @@ import {
   getObjectByIdOrNull,
   isStoreEmpty,
   isStoreFull,
+  runFsm,
   transitionState,
 } from "./fsm";
 
@@ -120,11 +121,14 @@ function runDeliver(creep: Creep): void {
   }
 }
 
+/** Main loop entry: acquire energy or deliver to structures, with same-tick re-dispatch after FSM transitions. */
 export const runShuttle = (creep: Creep): void => {
-  const state = ensureState(creep);
-  if (state === "deliver") {
-    runDeliver(creep);
-  } else {
-    runHarvest(creep);
-  }
+  runFsm(creep, () => {
+    const state = ensureState(creep);
+    if (state === "deliver") {
+      runDeliver(creep);
+    } else {
+      runHarvest(creep);
+    }
+  });
 };

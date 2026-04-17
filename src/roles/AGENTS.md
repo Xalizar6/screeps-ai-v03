@@ -12,7 +12,7 @@ These instructions apply when working in `src/roles/`.
 - Export a single, obvious entrypoint per role (for example `run(creep: Creep)`), so `src/index.ts` (or a manager) can call it without special-casing.
 - Keep role logic as a small **state machine** driven by `CreepMemory` (`state`, optional `targetId`, `stateSinceTick`), not by repeated expensive `find` operations when a cached id is still valid.
 - Put **FSM decisions and per-state handlers** in the role file. Do not centralize all roles into one global state-machine module.
-- Reuse **`src/roles/fsm.ts`** for shared mechanics only: `transitionState`, `isStoreEmpty` / `isStoreFull`, `getObjectByIdOrNull`, `resolveSource` (cached closest active source). Prefer `instanceof Source` / `StructureSpawn` / `ConstructionSite` when resolving `targetId` so wrong types clear the cache.
+- Reuse **`src/roles/fsm.ts`** for shared mechanics only: `transitionState`, `runFsm` (same-tick re-dispatch after a state change so the new state can `moveTo` without idling a tick), `isStoreEmpty` / `isStoreFull`, `getObjectByIdOrNull`, `resolveSource` (cached closest active source). Prefer `instanceof Source` / `StructureSpawn` / `ConstructionSite` when resolving `targetId` so wrong types clear the cache.
 - Use **`src/roles/energyAcquisition.ts`** for shared **energy pickup** (`acquireEnergy`): withdraw from source-adjacent containers (when enough energy), pickup dropped energy near sources, then harvest fallback. Room-level source/container IDs live in `RoomMemory.sources` (maintained by `src/management/roomCache.ts`).
 
 ## Memory + caching
@@ -20,6 +20,7 @@ These instructions apply when working in `src/roles/`.
 - Store durable references (IDs) in memory when it prevents repeated searches (source IDs, container IDs, target IDs).
 - Always handle missing objects from `Game.getObjectById(...)` (it can return `null`).
 - When adding FSM fields, extend `CreepMemory` in `src/types.d.ts` and document which states each role uses.
+- Do not gate FSM transitions on `creep.store` immediately after `transfer` / `withdraw` / `pickup` — those intents resolve at end-of-tick; `store` may still show pre-intent values. Prefer store checks at the **top** of the next handler pass (see **Intent timing** in `docs/agent-references/screeps-api.md`).
 
 ## TypeScript expectations
 
