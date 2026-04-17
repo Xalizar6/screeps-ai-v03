@@ -8,7 +8,10 @@ export const LOG_MODULE = "spawnManager" as const;
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
+/** Extra MOVE vs {@link DEFAULT_BODY} so full CARRY does not slow travel as much. */
+const BUILDER_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE, MOVE];
 const SHUTTLE_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE, MOVE];
+/** Extra WORK vs {@link DEFAULT_BODY} to increase mining rate . */
 const HARVESTER_BODY: BodyPartConstant[] = [WORK, WORK, CARRY, MOVE];
 
 function pickUnclaimedSourceId(
@@ -131,13 +134,13 @@ export const runSpawnManagement = (): void => {
     const desiredBuilders = Math.ceil(unfinishedSites / 3);
 
     if (builders.length < desiredBuilders) {
-      const code = spawn.spawnCreep(DEFAULT_BODY, `builder-${Game.time}`, {
+      const code = spawn.spawnCreep(BUILDER_BODY, `builder-${Game.time}`, {
         memory: { role: "builder" },
       });
       log.debugLazy(
         () =>
           `spawn=${spawn.name} branch=builder have=${builders.length} desired=${desiredBuilders} sites=${unfinishedSites} bodyCost=${bodyCost(
-            DEFAULT_BODY,
+            BUILDER_BODY,
           )} energy=${spawn.room.energyAvailable} code=${code}`,
       );
       continue;
