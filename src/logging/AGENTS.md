@@ -8,6 +8,10 @@ These instructions apply when working in `src/logging/` and when adding or chang
 - `levels.ts` — numeric `LogLevel`, string names (`LogLevelName`), `parseLogLevel` / `levelToString`.
 - `resolveLevel.ts` — `getEffectiveLevel(moduleId, codeDefault)` reads `Memory.log` and applies overrides.
 
+## JSDoc
+
+- Follow the **Documentation in code (JSDoc)** section in the root `AGENTS.md`. Each exported or internal helper here should have a one-line summary so level resolution and formatting stay approachable when you are new to the module.
+
 ## `LOG_MODULE` (required for feature modules)
 
 Each subsystem that logs should export a **single stable string id** used everywhere that module is referenced for logging:

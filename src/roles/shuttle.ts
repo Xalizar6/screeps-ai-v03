@@ -18,7 +18,11 @@ const DELIVERY_PRIORITY: readonly StructureConstant[] = [
   STRUCTURE_EXTENSION,
   STRUCTURE_TOWER,
 ];
-type DeliveryTarget = StructureSpawn | StructureExtension | StructureTower;
+type DeliveryTarget =
+  | StructureSpawn
+  | StructureExtension
+  | StructureTower
+  | StructureContainer;
 
 type ShuttleState = "harvest" | "deliver";
 
@@ -40,6 +44,21 @@ function isDeliveryTarget(
   );
 }
 
+function resolveControllerContainer(room: Room): StructureContainer | null {
+  const id = room.memory.controllerContainerId;
+  if (!id) {
+    return null;
+  }
+  const container = Game.getObjectById(id);
+  if (!(container instanceof StructureContainer)) {
+    return null;
+  }
+  if (container.store.getFreeCapacity(RESOURCE_ENERGY) <= 0) {
+    return null;
+  }
+  return container;
+}
+
 function resolveDeliveryTarget(creep: Creep): DeliveryTarget | null {
   const raw = getObjectByIdOrNull<
     | Source
@@ -52,10 +71,18 @@ function resolveDeliveryTarget(creep: Creep): DeliveryTarget | null {
     | Resource
   >(creep.memory.targetId);
   if (
-    raw &&
     (raw instanceof StructureSpawn ||
       raw instanceof StructureExtension ||
       raw instanceof StructureTower) &&
+    raw.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+  ) {
+    return raw;
+  }
+  const controllerContainerId = creep.room.memory.controllerContainerId;
+  if (
+    raw instanceof StructureContainer &&
+    controllerContainerId &&
+    raw.id === controllerContainerId &&
     raw.store.getFreeCapacity(RESOURCE_ENERGY) > 0
   ) {
     return raw;
@@ -83,6 +110,12 @@ function resolveDeliveryTarget(creep: Creep): DeliveryTarget | null {
       creep.memory.targetId = closest.id;
       return closest;
     }
+  }
+
+  const controllerContainer = resolveControllerContainer(creep.room);
+  if (controllerContainer) {
+    creep.memory.targetId = controllerContainer.id;
+    return controllerContainer;
   }
 
   return null;

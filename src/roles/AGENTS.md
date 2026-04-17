@@ -26,6 +26,11 @@ These instructions apply when working in `src/roles/`.
 
 - When adding role-specific memory fields, extend `CreepMemory` in `src/types.d.ts` (or the repo’s memory typing location) rather than using `as any`.
 
+## JSDoc
+
+- Follow the **Documentation in code (JSDoc)** section in the root `AGENTS.md`.
+- **Every** module-scope helper in a role file (state handlers, target resolvers, small guards) should have at least a one-line summary above it so the FSM reads top-to-bottom like a short tutorial.
+
 ## Logging
 
 - Follow **`src/logging/AGENTS.md`** (`LOG_MODULE`, levels, `Memory.log`). Use `createLogger` from `src/logging/logger.ts`.

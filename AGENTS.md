@@ -38,10 +38,24 @@ When assisting with this codebase, act as a **Senior Screeps Architect** and **T
   - Shared **helpers only** live in `src/roles/fsm.ts` (store checks, `transitionState`, `runFsm`, `getObjectByIdOrNull`). Do not extend `Creep.prototype` for simple guards; prefer pure helpers.
   - Persist `CreepMemory.state`, optional `targetId`, and `stateSinceTick` via `src/types.d.ts`; resolve cached IDs with `instanceof` or null checks so stale targets are cleared.
 
-- **Documentation in code (JSDoc)**
-  - Every **exported** function and every **non-trivial internal** function should have at least a one-line JSDoc summary describing what it does and why it exists.
-  - When parameters, return values, or side effects are non-obvious, add `@param` / `@returns` (or a short note on side effects). Prefer intent over repeating the implementation line-by-line.
-  - Trivial one-liners may omit `@param` / `@returns` but should still carry the summary line. Update JSDoc when behavior changes.
+- **Documentation in code (JSDoc)** — Treat comments as a **mini-tutorial** for anyone reading the file (including future you). TypeScript uses JSDoc for tooling and readability; see the [TypeScript JSDoc reference](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html).
+  - **Every named function** declared at **module scope** (exported or private `function foo` / `const foo = () =>`) should have a **`/** ... \*/`** block **directly above\*\* the declaration.
+  - **Minimum content**
+    - **Summary** (required, one line): what the function does and when to call it (intent, not a line-by-line repeat of the body).
+    - **Second sentence** (optional): why it exists if the name alone does not answer that (e.g. “Split out so … can be unit-tested” or “Avoids duplicate `PathFinder` calls”).
+  - **Add `@param` and `@returns`** when argument meaning, units, or the return value (including `null`, booleans meaning success, or Screeps error codes) is not obvious from types and names alone.
+  - **Side effects**: mention in the summary or a `@remarks` line when the function touches **`Memory`**, creates construction sites, enqueues spawns, writes logs at information level, or mutates global `Game` state — readers need to know without reading the whole body.
+  - **Exceptions** (summary still welcome when it helps): inline callbacks passed to `.map` / `.forEach` / `sort`, and trivial accessors whose comment would only restate the identifier. **Not** exempt: helpers used by roles or room logic — document those.
+  - **Update JSDoc when behavior changes** (same as code review).
+  - **Shape** (copy and trim tags you do not need):
+
+```ts
+/**
+ * One-line summary: what this does and when to call it.
+ * @param room Room being planned; caller must ensure …
+ * @returns Whether the operation succeeded (`OK` path only).
+ */
+```
 
 - **Logging** — Use `src/logging/` (`createLogger`, `moduleScope`, levels). Full conventions, `LOG_MODULE` export rules, `Memory.log`, and level semantics: **`src/logging/AGENTS.md`**.
 

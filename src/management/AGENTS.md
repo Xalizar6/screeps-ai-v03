@@ -23,6 +23,11 @@ These instructions apply when working in `src/management/`.
 
 - Keep exported APIs small and obvious (e.g. `runRoom(room: Room)` / `runSpawns(room: Room)`), so the main loop can call them predictably.
 
+## JSDoc
+
+- Follow the **Documentation in code (JSDoc)** section in the root `AGENTS.md`.
+- **Every** module-scope `function` / `const` helper in this folder should have at least a one-line `/** summary */` above it so construction and cache files read clearly when you are learning the flow.
+
 ## Logging
 
 - Export `LOG_MODULE` and follow **`src/logging/AGENTS.md`** for `createLogger` / `Memory.log.modules` and shared conventions.

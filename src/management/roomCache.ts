@@ -25,6 +25,23 @@ function pickContainerNearSource(
   return structures[0];
 }
 
+function pickContainerNearController(
+  controller: StructureController,
+): StructureContainer | undefined {
+  const structures = controller.pos.findInRange(FIND_STRUCTURES, 2, {
+    filter: (s): s is StructureContainer =>
+      s.structureType === STRUCTURE_CONTAINER,
+  });
+  if (structures.length === 0) {
+    return undefined;
+  }
+  structures.sort(
+    (a, b) =>
+      controller.pos.getRangeTo(a.pos) - controller.pos.getRangeTo(b.pos),
+  );
+  return structures[0];
+}
+
 function scanAndSetContainer(
   room: Room,
   sourceId: Id<Source>,
@@ -40,6 +57,21 @@ function scanAndSetContainer(
     log.debugLazy(
       () =>
         `room=${room.name} source=${sourceId} container=${container.id} branch=scan_found`,
+    );
+  }
+}
+
+function scanAndSetControllerContainer(room: Room): void {
+  const controller = room.controller;
+  if (!controller?.my) {
+    return;
+  }
+  const container = pickContainerNearController(controller);
+  if (container) {
+    room.memory.controllerContainerId = container.id;
+    log.debugLazy(
+      () =>
+        `room=${room.name} controllerContainer=${container.id} branch=scan_controller_found`,
     );
   }
 }
@@ -63,6 +95,9 @@ export function runRoomCache(room: Room): void {
     log.debugLazy(
       () => `room=${room.name} branch=init_sources count=${sources.length}`,
     );
+    if (!room.memory.controllerContainerId) {
+      scanAndSetControllerContainer(room);
+    }
     return;
   }
 
@@ -89,5 +124,19 @@ export function runRoomCache(room: Room): void {
     if (!entry.containerId && rescanDue) {
       scanAndSetContainer(room, sourceId, entry);
     }
+  }
+
+  if (room.memory.controllerContainerId) {
+    const controllerContainer = Game.getObjectById(
+      room.memory.controllerContainerId,
+    );
+    if (!(controllerContainer instanceof StructureContainer)) {
+      delete room.memory.controllerContainerId;
+      log.debugLazy(() => `room=${room.name} branch=controller_container_gone`);
+    }
+  }
+
+  if (!room.memory.controllerContainerId && rescanDue) {
+    scanAndSetControllerContainer(room);
   }
 }
