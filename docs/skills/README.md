@@ -32,6 +32,15 @@ Use this template after each pilot-skill task:
 - Follow-up tuning:
 ```
 
+### 2026-04-17 - Upgrader controller container energy
+
+- Skill used: `adding-a-creep-role`, `checking-screeps-api`
+- Auto-invoked: no
+- False-positive invocation: no
+- Missed steps prevented: Reused `RoomMemory.controllerContainerId` + `getObjectByIdOrNull` instead of per-creep `find`; avoided same-tick `creep.store` transitions after `withdraw` (handler entry uses `isStoreFull` only).
+- Token efficiency observations: Short skill files pointed at workflow without needing full `references/` reads for this change.
+- Follow-up tuning: none
+
 ## Exit Criteria for Pilot
 
 - Pilot skills auto-invoke reliably for expected prompts.

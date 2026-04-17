@@ -1,7 +1,13 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import { acquireEnergy } from "./energyAcquisition";
-import { isStoreEmpty, isStoreFull, runFsm, transitionState } from "./fsm";
+import {
+  getObjectByIdOrNull,
+  isStoreEmpty,
+  isStoreFull,
+  runFsm,
+  transitionState,
+} from "./fsm";
 
 export const LOG_MODULE = "upgrader" as const;
 
@@ -15,6 +21,27 @@ function ensureState(creep: Creep): UpgraderState {
     creep.memory.stateSinceTick = Game.time;
   }
   return creep.memory.state === "upgrade" ? "upgrade" : "harvest";
+}
+
+/**
+ * Resolves the room-cached controller-adjacent container when it exists and holds energy.
+ * Uses `RoomMemory.controllerContainerId` (maintained by `roomCache`) so upgraders avoid repeated `find` scans.
+ */
+function resolveViableControllerContainer(
+  room: Room,
+): StructureContainer | null {
+  const id = room.memory.controllerContainerId;
+  if (!id) {
+    return null;
+  }
+  const raw = getObjectByIdOrNull(id);
+  if (!(raw instanceof StructureContainer)) {
+    return null;
+  }
+  if (raw.store[RESOURCE_ENERGY] <= 0) {
+    return null;
+  }
+  return raw;
 }
 
 function resolveController(creep: Creep): StructureController | null {
@@ -35,12 +62,41 @@ function resolveController(creep: Creep): StructureController | null {
   return null;
 }
 
+/**
+ * Refills the creep: prefer withdraw from `RoomMemory.controllerContainerId` when viable, else `acquireEnergy`.
+ * @remarks Does not gate FSM transitions on `creep.store` after `withdraw`; `isStoreFull` runs at handler entry only.
+ */
 function runHarvest(creep: Creep): void {
   if (isStoreFull(creep)) {
     transitionState(creep, "upgrade");
     return;
   }
-  acquireEnergy(creep);
+  const controllerContainer = resolveViableControllerContainer(creep.room);
+  if (!controllerContainer) {
+    const cachedCcId = creep.room.memory.controllerContainerId;
+    if (cachedCcId && creep.memory.targetId === cachedCcId) {
+      delete creep.memory.targetId;
+    }
+    acquireEnergy(creep);
+    return;
+  }
+  creep.memory.targetId = controllerContainer.id;
+  log.path(`${creep.name} branch=withdraw_controller_container`);
+  const result = creep.withdraw(controllerContainer, RESOURCE_ENERGY);
+  log.debugLazy(
+    () =>
+      `${creep.name} action=withdraw container=${controllerContainer.id} result=${result}`,
+  );
+  if (result === ERR_NOT_IN_RANGE) {
+    creep.moveTo(controllerContainer);
+    log.path(`${creep.name} branch=controller_container_not_in_range`);
+    return;
+  }
+  if (result === ERR_NOT_ENOUGH_RESOURCES || result === ERR_INVALID_TARGET) {
+    delete creep.memory.targetId;
+    acquireEnergy(creep);
+    return;
+  }
 }
 
 function runUpgrade(creep: Creep): void {
