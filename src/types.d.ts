@@ -58,4 +58,6 @@ interface RoomMemory {
   lastManagedTick?: number;
   /** Source IDs -> nearby container cache; maintained by `src/management/roomCache.ts`. */
   sources?: Record<Id<Source>, SourceMemory>;
+  /** Container near the room controller for upgrader supply; maintained by `src/management/roomCache.ts`. */
+  controllerContainerId?: Id<StructureContainer>;
 }
