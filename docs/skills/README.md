@@ -23,6 +23,7 @@ Use this template after each pilot-skill task:
 
 ```md
 ### YYYY-MM-DD - <task name>
+
 - Skill used:
 - Auto-invoked: yes/no
 - False-positive invocation: yes/no
@@ -46,10 +47,12 @@ Run this after at least 2 uses per pilot skill.
 ## Pilot Gate Review - YYYY-MM-DD
 
 ### Coverage
+
 - adding-a-creep-role runs: <n>
 - checking-screeps-api runs: <n>
 
 ### Metrics
+
 - Auto-invocation hit rate: <percent> (target: >= 75%)
 - False-positive rate: <percent> (target: <= 25%)
 - Tasks with missed-step prevention: <n> (target: >= 1 total)
@@ -58,13 +61,16 @@ Run this after at least 2 uses per pilot skill.
   - PASS definition: SKILL.md stayed concise and detailed guidance remained in references.
 
 ### Decision
+
 - GO to full rollout / NO-GO
 
 ### If NO-GO, required fixes
+
 - <description>
 - <description>
 
 ### Owner sign-off
+
 - Reviewer:
 - Date:
 ```
