@@ -1,11 +1,19 @@
 ---
 name: checking-screeps-api
-description: Validate Screeps API behavior before changing intent handling, return-code flow, or same-tick store logic. Use when editing creep actions, transition conditions, or ERR_* handling in roles or management code.
+description: Validate Screeps API behavior before changing intents, return-code branches, or same-tick store assumptions. Use when the user mentions transfer/withdraw/pickup/harvest timing, creep.store updates, ERR_NOT_IN_RANGE or ERR_BUSY handling, moveTo after action results, or cached ID resolution with Game.getObjectById.
 ---
 
 # Checking Screeps API Behavior
 
 Use this skill when implementation depends on exact Screeps runtime semantics.
+
+## When to Use (Trigger Phrases)
+
+- "intent timing", "same tick", "creep.store"
+- "ERR_NOT_IN_RANGE", "ERR_BUSY", "return code"
+- "transfer", "withdraw", "pickup", "harvest", "moveTo"
+- "action result", "transition condition", "post-action check"
+- "Game.getObjectById", "cached id", "soft reference"
 
 ## Quick Workflow
 

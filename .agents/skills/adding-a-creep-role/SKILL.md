@@ -1,11 +1,19 @@
 ---
 name: adding-a-creep-role
-description: Add or evolve a Screeps creep role with correct cross-file wiring for FSM, memory typing, logging, and main loop integration. Use when creating a new role, adding role states, or modifying role behavior in src/roles.
+description: Add or evolve a Screeps role with correct cross-file wiring across src/roles, src/types.d.ts, src/index.ts, and spawn integration. Use when the user mentions new role, role state, FSM transition, CreepMemory, targetId/stateSinceTick, role pass wiring, or upgrader/shuttle role behavior changes.
 ---
 
 # Adding a Creep Role
 
 Use this skill when role logic changes in `src/roles/`.
+
+## When to Use (Trigger Phrases)
+
+- "new role", "add role", "role behavior", "role refactor"
+- "FSM state", "state transition", "state machine"
+- "CreepMemory", "targetId", "stateSinceTick", "memory fields"
+- "wire role pass", "update src/index.ts", "spawn role target"
+- "upgrader", "shuttle", "builder", "harvester", "repairer" role updates
 
 ## Quick Workflow
 
