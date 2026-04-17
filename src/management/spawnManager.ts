@@ -1,7 +1,11 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import { countRepairBacklog } from "./repairConfig";
-import { getUnfilledEnergyStructures } from "./structureCache";
+import {
+  computeShuttleDemand,
+  DEFAULT_SHUTTLE_PROFILE_ID,
+  SHUTTLE_PROFILE_BODIES,
+} from "./shuttleDemand";
 
 export const LOG_MODULE = "spawnManager" as const;
 
@@ -10,7 +14,9 @@ const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
 /** Extra MOVE vs {@link DEFAULT_BODY} so full CARRY does not slow travel as much. */
 const BUILDER_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE, MOVE];
-const SHUTTLE_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE, MOVE];
+const SHUTTLE_BODY: BodyPartConstant[] = [
+  ...SHUTTLE_PROFILE_BODIES[DEFAULT_SHUTTLE_PROFILE_ID],
+];
 /** Extra WORK vs {@link DEFAULT_BODY} to increase mining rate . */
 const HARVESTER_BODY: BodyPartConstant[] = [WORK, WORK, CARRY, MOVE];
 
@@ -92,15 +98,18 @@ export const runSpawnManagement = (): void => {
         creep.memory.role === "shuttle" &&
         creep.room.name === spawn.room.name,
     );
-    const unfilled = getUnfilledEnergyStructures(spawn.room);
-    const desiredShuttles = Math.max(1, Math.ceil(unfilled.length / 4));
+    const shuttleDemand = computeShuttleDemand(spawn.room, SHUTTLE_BODY);
+    const desiredShuttles = shuttleDemand.desiredShuttles;
     if (shuttles.length < desiredShuttles) {
       const code = spawn.spawnCreep(SHUTTLE_BODY, `shuttle-${Game.time}`, {
-        memory: { role: "shuttle" },
+        memory: {
+          role: "shuttle",
+          shuttleProfileId: DEFAULT_SHUTTLE_PROFILE_ID,
+        },
       });
       log.debugLazy(
         () =>
-          `spawn=${spawn.name} branch=shuttle have=${shuttles.length} desired=${desiredShuttles} unfilled=${unfilled.length} bodyCost=${bodyCost(
+          `spawn=${spawn.name} branch=shuttle have=${shuttles.length} desired=${desiredShuttles} profile=${DEFAULT_SHUTTLE_PROFILE_ID} workParts=${shuttleDemand.upgraderWorkParts} requiredPerTick=${shuttleDemand.requiredEnergyPerTick.toFixed(2)} throughput=${shuttleDemand.shuttleThroughputPerTick.toFixed(2)} roundTrip=${shuttleDemand.estimatedRoundTripTicks} deficitEnergy=${shuttleDemand.structureDeficitEnergy} bodyCost=${bodyCost(
             SHUTTLE_BODY,
           )} energy=${spawn.room.energyAvailable} code=${code}`,
       );
@@ -109,7 +118,9 @@ export const runSpawnManagement = (): void => {
 
     const upgraders = Object.values(Game.creeps).filter(
       (creep): creep is Creep =>
-        creep !== undefined && creep.memory.role === "upgrader",
+        creep !== undefined &&
+        creep.memory.role === "upgrader" &&
+        creep.room.name === spawn.room.name,
     );
 
     if (upgraders.length < 3) {
@@ -155,18 +166,20 @@ export const runSpawnManagement = (): void => {
     const desiredRepairers = Math.ceil(repairBacklog / 3);
     const needMoreRepairers = repairers.length < desiredRepairers;
 
-    log.debugLazy(
-      () =>
-        `spawn=${spawn.name} branch=repair backlog=${repairBacklog} desiredRepairers=${desiredRepairers} repairers=${repairers.length} needSpawn=${needMoreRepairers} energy=${spawn.room.energyAvailable} bodyCost=${bodyCost(DEFAULT_BODY)}`,
-    );
-
     if (needMoreRepairers) {
       const code = spawn.spawnCreep(DEFAULT_BODY, `repairer-${Game.time}`, {
         memory: { role: "repairer" },
       });
       log.debugLazy(
         () =>
-          `spawn=${spawn.name} action=spawnRepairer code=${code} name=repairer-${Game.time}`,
+          `spawn=${spawn.name} branch=repair backlog=${repairBacklog} desiredRepairers=${desiredRepairers} repairers=${repairers.length} bodyCost=${bodyCost(
+            DEFAULT_BODY,
+          )} energy=${spawn.room.energyAvailable} code=${code}`,
+      );
+    } else {
+      log.debugLazy(
+        () =>
+          `spawn=${spawn.name} branch=idle reason=no_spawn_needed energy=${spawn.room.energyAvailable}`,
       );
     }
   }

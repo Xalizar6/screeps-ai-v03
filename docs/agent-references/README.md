@@ -4,6 +4,7 @@ This folder is a **shared reference library** for agents working in this repo.
 
 - **Repo rules live elsewhere**: follow the various `AGENTS.md` files for repo-specific conventions.
 - **These docs are supporting material**: use them when you need Screeps gameplay/API detail or project patterns.
+- **Workflow lives in skills**: use `.agents/skills/` for process checklists; use this folder for Screeps facts and behavior references.
 
 ## Canonical Screeps documentation
 
@@ -19,6 +20,9 @@ This folder is a **shared reference library** for agents working in this repo.
 - `screeps-api.md`
   - When you need exact API behavior (e.g. `Game.getObjectById`, `Room.find`, `Creep` actions, return codes).
   - When implementing a new behavior and want the correct primitive calls.
+
+- `external-example-codebases.md`
+  - When you want **optional pointers** to other open-source Screeps AIs (bonzAI, Overmind, Nooby Guide) for patterns and vocabulary — not mirrored here; adapt to this repo’s standards.
 
 ## How we use references in this repo
 
