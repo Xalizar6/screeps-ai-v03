@@ -43,24 +43,28 @@ function findDroppedEnergyNearSources(creep: Creep): Resource | null {
   if (!sourcesMem) {
     return null;
   }
+  const drops = creep.room.find(FIND_DROPPED_RESOURCES, {
+    filter: (r): r is Resource =>
+      r.resourceType === RESOURCE_ENERGY && r.amount > 0,
+  });
   let best: Resource | null = null;
   let bestRange = Infinity;
-  for (const sourceIdStr of Object.keys(sourcesMem)) {
-    const sourceId = sourceIdStr as Id<Source>;
-    const source = Game.getObjectById(sourceId);
-    if (!(source instanceof Source)) {
+  for (const r of drops) {
+    let nearSource = false;
+    for (const sourceIdStr of Object.keys(sourcesMem)) {
+      const source = Game.getObjectById(sourceIdStr as Id<Source>);
+      if (source instanceof Source && r.pos.inRangeTo(source.pos, 1)) {
+        nearSource = true;
+        break;
+      }
+    }
+    if (!nearSource) {
       continue;
     }
-    const dropped = source.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
-    for (const r of dropped) {
-      if (r.resourceType !== RESOURCE_ENERGY || r.amount <= 0) {
-        continue;
-      }
-      const range = creep.pos.getRangeTo(r.pos);
-      if (range < bestRange) {
-        bestRange = range;
-        best = r;
-      }
+    const range = creep.pos.getRangeTo(r.pos);
+    if (range < bestRange) {
+      bestRange = range;
+      best = r;
     }
   }
   return best;

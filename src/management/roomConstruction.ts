@@ -10,6 +10,9 @@ const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 const PATHFINDER_MAX_OPS = 4000;
 
+/** Defer heavy `PathFinder` work when the bucket is low (see Screeps CPU bucket docs). */
+const MIN_BUCKET_FOR_CONSTRUCTION_PLAN = 1200;
+
 /** Deterministic order: nested dx, then dy (same as fallback scan). */
 function adjacentPositions(sourcePos: RoomPosition): RoomPosition[] {
   const out: RoomPosition[] = [];
@@ -159,10 +162,11 @@ function planContainerNearSource(room: Room, source: Source): void {
 
 /**
  * Place a controller container ~2 tiles from the controller, biased toward
- * the closest source. We take the 2nd step of the controller->source path so
- * the tile sits on the natural walking corridor and creeps pass through it.
+ * the closest source. Reuses `sources` from the caller to avoid a second `FIND_SOURCES`.
+ * @param room Owned room
+ * @param sources Same array as used for per-source container planning this tick
  */
-function planContainerNearController(room: Room): void {
+function planContainerNearController(room: Room, sources: Source[]): void {
   const controller = room.controller;
   if (!controller?.my) {
     return;
@@ -174,7 +178,6 @@ function planContainerNearController(room: Room): void {
   ) {
     return;
   }
-  const sources = room.find(FIND_SOURCES);
   if (sources.length === 0) {
     return;
   }
@@ -207,9 +210,17 @@ export function runRoomConstruction(room: Room): void {
     return;
   }
 
+  if (Game.cpu.bucket < MIN_BUCKET_FOR_CONSTRUCTION_PLAN) {
+    log.debugLazy(
+      () =>
+        `room=${room.name} skip=low_bucket bucket=${Game.cpu.bucket} min=${MIN_BUCKET_FOR_CONSTRUCTION_PLAN}`,
+    );
+    return;
+  }
+
   const sources = room.find(FIND_SOURCES);
   for (const source of sources) {
     planContainerNearSource(room, source);
   }
-  planContainerNearController(room);
+  planContainerNearController(room, sources);
 }

@@ -57,23 +57,31 @@ function resolveRepairTarget(creep: Creep): Structure | null {
     }
   }
 
-  const candidates = getStructures(creep.room).filter(
-    (structure) =>
-      isRepairCandidateType(structure.structureType) &&
-      structure.hits < structure.hitsMax * 0.5,
-  );
-  if (candidates.length === 0) {
+  let best: Structure | null = null;
+  let bestPriority = Infinity;
+  let bestRange = Infinity;
+  for (const structure of getStructures(creep.room)) {
+    if (
+      !isRepairCandidateType(structure.structureType) ||
+      structure.hits >= structure.hitsMax * 0.5
+    ) {
+      continue;
+    }
+    const p = getRepairTypePriority(structure.structureType);
+    const r = creep.pos.getRangeTo(structure.pos);
+    if (
+      best === null ||
+      p < bestPriority ||
+      (p === bestPriority && r < bestRange)
+    ) {
+      best = structure;
+      bestPriority = p;
+      bestRange = r;
+    }
+  }
+  if (!best) {
     return null;
   }
-  candidates.sort((a, b) => {
-    const pa = getRepairTypePriority(a.structureType);
-    const pb = getRepairTypePriority(b.structureType);
-    if (pa !== pb) {
-      return pa - pb;
-    }
-    return creep.pos.getRangeTo(a.pos) - creep.pos.getRangeTo(b.pos);
-  });
-  const best = candidates[0] as Structure;
   creep.memory.repairTargetId = best.id;
   return best;
 }

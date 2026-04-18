@@ -1,5 +1,6 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
+import { getActiveShuttleCountInRoom } from "../management/creepSnapshot";
 import {
   isStoreEmpty,
   isStoreFull,
@@ -21,22 +22,6 @@ function ensureState(creep: Creep): HarvesterState {
     creep.memory.stateSinceTick = Game.time;
   }
   return creep.memory.state === "deliver" ? "deliver" : "harvest";
-}
-
-function countRoomShuttles(roomName: string): number {
-  let total = 0;
-  for (const creepName in Game.creeps) {
-    const creep = Game.creeps[creepName];
-    if (
-      creep &&
-      creep.memory.role === "shuttle" &&
-      creep.room.name === roomName &&
-      !creep.spawning
-    ) {
-      total += 1;
-    }
-  }
-  return total;
 }
 
 function resolveAssignedSource(creep: Creep): Source | null {
@@ -104,7 +89,7 @@ function resolveFallbackDeliveryTarget(
 }
 
 function runHarvest(creep: Creep): void {
-  const shuttleCount = countRoomShuttles(creep.room.name);
+  const shuttleCount = getActiveShuttleCountInRoom(creep.room.name);
   if (shuttleCount === 0 && isStoreFull(creep)) {
     transitionState(creep, "deliver");
     return;
@@ -172,7 +157,7 @@ function runHarvest(creep: Creep): void {
 }
 
 function runDeliver(creep: Creep): void {
-  if (countRoomShuttles(creep.room.name) > 0) {
+  if (getActiveShuttleCountInRoom(creep.room.name) > 0) {
     transitionState(creep, "harvest");
     return;
   }
