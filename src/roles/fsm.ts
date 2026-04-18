@@ -28,6 +28,17 @@ export function isStoreFull(
 }
 
 /**
+ * True when carry energy is at most half of capacity (used for work-state top-up gating).
+ */
+export function isEnergyBelowWorkTopUpThreshold(creep: Creep): boolean {
+  const cap = creep.store.getCapacity(RESOURCE_ENERGY);
+  if (cap <= 0) {
+    return false;
+  }
+  return creep.store[RESOURCE_ENERGY] * 2 <= cap;
+}
+
+/**
  * Resolves an id from memory; returns null if missing or stale.
  */
 export function getObjectByIdOrNull<T extends _HasId>(

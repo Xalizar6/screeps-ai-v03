@@ -6,8 +6,17 @@ import {
 import { getStructures } from "../management/structureCache";
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
-import { acquireEnergy } from "./energyAcquisition";
-import { isStoreEmpty, isStoreFull, runFsm, transitionState } from "./fsm";
+import {
+  acquireEnergy,
+  tryAdjacentWorkStateEnergyTopUp,
+} from "./energyAcquisition";
+import {
+  isEnergyBelowWorkTopUpThreshold,
+  isStoreEmpty,
+  isStoreFull,
+  runFsm,
+  transitionState,
+} from "./fsm";
 
 export const LOG_MODULE = "repairer" as const;
 
@@ -95,7 +104,11 @@ function runHarvest(creep: Creep): void {
 }
 
 function runRepair(creep: Creep): void {
-  if (isStoreEmpty(creep)) {
+  if (
+    isEnergyBelowWorkTopUpThreshold(creep) &&
+    !tryAdjacentWorkStateEnergyTopUp(creep) &&
+    isStoreEmpty(creep)
+  ) {
     transitionState(creep, "harvest");
     return;
   }
