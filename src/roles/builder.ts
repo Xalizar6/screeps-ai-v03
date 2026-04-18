@@ -1,7 +1,16 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
-import { acquireEnergy } from "./energyAcquisition";
-import { isStoreEmpty, isStoreFull, runFsm, transitionState } from "./fsm";
+import {
+  acquireEnergy,
+  tryAdjacentWorkStateEnergyTopUp,
+} from "./energyAcquisition";
+import {
+  isEnergyBelowWorkTopUpThreshold,
+  isStoreEmpty,
+  isStoreFull,
+  runFsm,
+  transitionState,
+} from "./fsm";
 
 export const LOG_MODULE = "builder" as const;
 
@@ -27,7 +36,7 @@ function resolveSite(creep: Creep): ConstructionSite | null {
   if (raw) {
     delete creep.memory.targetId;
   }
-  const site = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+  const site = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
   if (site) {
     creep.memory.targetId = site.id;
   }
@@ -43,7 +52,11 @@ function runHarvest(creep: Creep): void {
 }
 
 function runBuild(creep: Creep): void {
-  if (isStoreEmpty(creep)) {
+  if (
+    isEnergyBelowWorkTopUpThreshold(creep) &&
+    !tryAdjacentWorkStateEnergyTopUp(creep) &&
+    isStoreEmpty(creep)
+  ) {
     transitionState(creep, "harvest");
     return;
   }
@@ -72,7 +85,10 @@ function runBuild(creep: Creep): void {
 
 /** Main loop entry: harvest energy or build construction sites, with same-tick re-dispatch after FSM transitions. */
 export const runBuilder = (creep: Creep): void => {
-  if (creep.room.find(FIND_CONSTRUCTION_SITES).length === 0) {
+  const siteCount =
+    creep.room.memory.myConstructionSiteCount ??
+    creep.room.find(FIND_MY_CONSTRUCTION_SITES).length;
+  if (siteCount === 0) {
     log.path(`${creep.name} branch=suicide_no_construction_sites`);
     creep.suicide();
     return;

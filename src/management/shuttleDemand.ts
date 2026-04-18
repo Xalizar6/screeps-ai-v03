@@ -145,12 +145,17 @@ export function getShuttleThroughputPerTick(
  * Computes desired shuttle count from upgrader WORK draw, structure refill deficit, and modeled throughput.
  * @param room Owned room with cache already run for this tick
  * @param shuttleBody Body profile used for throughput (must match spawned shuttles for this profile)
+ * @param precomputedUpgraderWorkParts When set, skips a second global `Game.creeps` scan (from tick snapshot)
  */
 export function computeShuttleDemand(
   room: Room,
   shuttleBody: BodyPartConstant[],
+  precomputedUpgraderWorkParts?: number,
 ): ShuttleDemandBreakdown {
-  const upgraderWorkParts = sumUpgraderWorkPartsInRoom(room);
+  const upgraderWorkParts =
+    precomputedUpgraderWorkParts !== undefined
+      ? precomputedUpgraderWorkParts
+      : sumUpgraderWorkPartsInRoom(room);
   const controllerDemandPerTick = upgraderWorkParts;
 
   const unfilled = getUnfilledEnergyStructures(room);

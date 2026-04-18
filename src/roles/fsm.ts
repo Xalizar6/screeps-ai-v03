@@ -13,6 +13,12 @@ const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 /** Allowed FSM state names across roles; mirrors `CreepMemory["state"]`. */
 export type RoleFsmState = NonNullable<CreepMemory["state"]>;
 
+/**
+ * When carry energy is at or below this fraction of max capacity, work-state handlers may
+ * attempt adjacent pipeline-3 top-up before flipping to harvest (builder, repairer, upgrader).
+ */
+export const WORK_TOPUP_ENERGY_MAX_RATIO = 0.5;
+
 export function isStoreEmpty(
   creep: Creep,
   resource: ResourceConstant = RESOURCE_ENERGY,
@@ -25,6 +31,17 @@ export function isStoreFull(
   resource: ResourceConstant = RESOURCE_ENERGY,
 ): boolean {
   return creep.store.getFreeCapacity(resource) === 0;
+}
+
+/**
+ * True when carry energy is at most `WORK_TOPUP_ENERGY_MAX_RATIO` of capacity (work-state top-up gating).
+ */
+export function isEnergyBelowWorkTopUpThreshold(creep: Creep): boolean {
+  const cap = creep.store.getCapacity(RESOURCE_ENERGY);
+  if (cap <= 0) {
+    return false;
+  }
+  return creep.store[RESOURCE_ENERGY] <= cap * WORK_TOPUP_ENERGY_MAX_RATIO;
 }
 
 /**

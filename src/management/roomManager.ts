@@ -9,6 +9,7 @@ import {
   LOG_MODULE as structureCacheModule,
   runStructureCache,
 } from "./structureCache";
+import { countMyConstructionSitesByRoom } from "./tickSignals";
 
 export const LOG_MODULE = "roomManager" as const;
 
@@ -20,6 +21,7 @@ const structureCacheLogger = createLogger(structureCacheModule, {
 });
 
 export const runRoomManagement = (): void => {
+  const siteCountsByRoom = countMyConstructionSitesByRoom();
   const runConstructionPlan = Game.time % CONSTRUCTION_PLAN_INTERVAL === 0;
   for (const roomName in Game.rooms) {
     const room = Game.rooms[roomName];
@@ -27,6 +29,7 @@ export const runRoomManagement = (): void => {
       continue;
     }
     room.memory.lastManagedTick = Game.time;
+    room.memory.myConstructionSiteCount = siteCountsByRoom[room.name] ?? 0;
     roomCacheLogger.moduleScope("runRoomCache", () => {
       runRoomCache(room);
     });

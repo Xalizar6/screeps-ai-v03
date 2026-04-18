@@ -1,5 +1,7 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
+import type { CreepSnapshot } from "./creepSnapshot";
+import { getRoomCreepBucket } from "./creepSnapshot";
 import { countRepairBacklog } from "./repairConfig";
 import {
   computeShuttleDemand,
@@ -54,7 +56,11 @@ function getDesiredHarvesterCount(room: Room): number {
   return room.find(FIND_SOURCES).length;
 }
 
-export const runSpawnManagement = (): void => {
+/**
+ * Spawns creeps using a pre-built per-tick creep snapshot (one global creep pass).
+ * @param snapshot From `buildCreepSnapshot()` in `creepSnapshot.ts` for this tick
+ */
+export const runSpawnManagement = (snapshot: CreepSnapshot): void => {
   for (const spawnName in Game.spawns) {
     const spawn = Game.spawns[spawnName];
     if (!spawn) {
@@ -70,12 +76,9 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
-    const harvesters = Object.values(Game.creeps).filter(
-      (creep): creep is Creep =>
-        creep !== undefined &&
-        creep.memory.role === "harvester" &&
-        creep.room.name === spawn.room.name,
-    );
+    const roomName = spawn.room.name;
+    const bucket = getRoomCreepBucket(roomName, snapshot);
+    const harvesters = bucket.harvesters;
     const desiredHarvesters = getDesiredHarvesterCount(spawn.room);
 
     if (harvesters.length < desiredHarvesters) {
@@ -92,13 +95,12 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
-    const shuttles = Object.values(Game.creeps).filter(
-      (creep): creep is Creep =>
-        creep !== undefined &&
-        creep.memory.role === "shuttle" &&
-        creep.room.name === spawn.room.name,
+    const shuttles = bucket.shuttles;
+    const shuttleDemand = computeShuttleDemand(
+      spawn.room,
+      SHUTTLE_BODY,
+      bucket.upgraderWorkParts,
     );
-    const shuttleDemand = computeShuttleDemand(spawn.room, SHUTTLE_BODY);
     const desiredShuttles = shuttleDemand.desiredShuttles;
     if (shuttles.length < desiredShuttles) {
       const code = spawn.spawnCreep(SHUTTLE_BODY, `shuttle-${Game.time}`, {
@@ -116,12 +118,7 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
-    const upgraders = Object.values(Game.creeps).filter(
-      (creep): creep is Creep =>
-        creep !== undefined &&
-        creep.memory.role === "upgrader" &&
-        creep.room.name === spawn.room.name,
-    );
+    const upgraders = bucket.upgraders;
 
     if (upgraders.length < 3) {
       const code = spawn.spawnCreep(DEFAULT_BODY, `upgrader-${Game.time}`, {
@@ -136,12 +133,9 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
-    const builders = Object.values(Game.creeps).filter(
-      (creep): creep is Creep =>
-        creep !== undefined && creep.memory.role === "builder",
-    );
+    const builders = bucket.builders;
 
-    const unfinishedSites = spawn.room.find(FIND_CONSTRUCTION_SITES).length;
+    const unfinishedSites = spawn.room.memory.myConstructionSiteCount ?? 0;
     const desiredBuilders = Math.ceil(unfinishedSites / 3);
 
     if (builders.length < desiredBuilders) {
@@ -157,10 +151,7 @@ export const runSpawnManagement = (): void => {
       continue;
     }
 
-    const repairers = Object.values(Game.creeps).filter(
-      (creep): creep is Creep =>
-        creep !== undefined && creep.memory.role === "repairer",
-    );
+    const repairers = bucket.repairers;
 
     const repairBacklog = countRepairBacklog(spawn.room);
     const desiredRepairers = Math.ceil(repairBacklog / 3);

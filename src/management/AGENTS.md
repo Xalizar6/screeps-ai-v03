@@ -13,6 +13,7 @@ These instructions apply when working in `src/management/`.
 
 - Prefer a **single room pass** that computes/caches reusable data once, then feeds it into the rest of the tick.
 - Be careful with repeated `room.find(...)` calls; cache results for the tick (or store IDs in `RoomMemory` when it makes sense).
+- For **bursty** work (heavy pathing, large scans), consider `Game.cpu.bucket` / `Game.cpu.tickLimit` and defer to ticks with headroom — see **CPU limit and bucket** in `docs/agent-references/screeps-api.md` and [CPU limit](https://docs.screeps.com/cpu-limit.html).
 
 ## Memory typing
 
@@ -25,7 +26,7 @@ These instructions apply when working in `src/management/`.
 
 ## JSDoc
 
-- Follow the **Documentation in code (JSDoc)** section in the root `AGENTS.md`.
+- Follow root [`AGENTS.md`](../../AGENTS.md) and **[`docs/agent-references/jsdoc-conventions.md`](../../docs/agent-references/jsdoc-conventions.md)**.
 - **Every** module-scope `function` / `const` helper in this folder should have at least a one-line `/** summary */` above it so construction and cache files read clearly when you are learning the flow.
 
 ## Logging
@@ -37,5 +38,5 @@ These instructions apply when working in `src/management/`.
 
 When implementing room/spawn orchestration or caching, consult:
 
-- `docs/agent-references/screeps-api.md` (room queries, soft references via `Game.getObjectById`)
-- `docs/agent-references/screeps-overview.md` (CPU + data flow expectations)
+- `docs/agent-references/screeps-api.md` (room queries, CPU bucket, soft references via `Game.getObjectById`)
+- `docs/agent-references/screeps-overview.md` (CPU + data flow, gameplay assumptions e.g. sources/spawns)

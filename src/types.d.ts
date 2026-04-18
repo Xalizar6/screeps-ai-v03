@@ -58,6 +58,8 @@ interface Memory {
 
 interface RoomMemory {
   lastManagedTick?: number;
+  /** Count of `my` construction sites in this room; refreshed each tick in `roomManager` from `Game.constructionSites`. */
+  myConstructionSiteCount?: number;
   /** Source IDs -> nearby container cache; maintained by `src/management/roomCache.ts`. */
   sources?: Record<Id<Source>, SourceMemory>;
   /** Container near the room controller for upgrader supply; maintained by `src/management/roomCache.ts`. */

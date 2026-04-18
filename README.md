@@ -9,6 +9,16 @@ Screeps World AI created with AI agent assistance.
 - Personal growth in handling a larger multi-file codebase instead of small scripts.
 - Gradually build an advanced Screeps World AI framework with a human-in-the-loop process for review and learning.
 
+## Using Skills (Quick Start)
+
+Project workflows live under [`.agents/skills/`](.agents/skills/) (each folder has a `SKILL.md`). Cursor discovers them for this workspace (**Settings → Rules → Skills**).
+
+- Open **Agent** chat and type **`/`** to search and invoke a skill by name.
+- Manual invocation (recommended for safety-critical work): **`/adding-a-creep-role`**, **`/checking-screeps-api`** — full slash list in [`docs/skills/README.md`](docs/skills/README.md)
+- After a run you care to track, append an entry to the **Pilot Log** in [`docs/skills/README.md`](docs/skills/README.md).
+
+Full **skill catalog**, **slash commands**, trigger phrases, and a short **practice routine**: [`docs/skills/README.md`](docs/skills/README.md).
+
 ## Architecture (creep roles)
 
 - **Main loop** (`src/index.ts`): room/spawn management, then per-role passes over `Game.creeps`.
@@ -22,50 +32,24 @@ To add or evolve a role, use the project skill at `.agents/skills/adding-a-creep
 
 Logging lives in `src/logging/` (`createLogger`, levels, `Memory.log` resolution). Lines look like `[tick=…][moduleId][TAG] …`. Types for `Memory.log` are in `src/types.d.ts`.
 
-For operational logging workflow and behavior-change safety checks, use:
+**Levels** (strings in `Memory`): `error` → `information` → `verbose` → `debug`. Effective level: `Memory.log.modules[id]` → `Memory.log.default` → logger default. See [`AGENTS.md`](AGENTS.md) and [`src/logging/AGENTS.md`](src/logging/AGENTS.md) for logging rules; full **JSDoc** spec: [`docs/agent-references/jsdoc-conventions.md`](docs/agent-references/jsdoc-conventions.md).
 
-- `.agents/skills/checking-screeps-api/SKILL.md`
-- `.agents/skills/adding-a-creep-role/SKILL.md` (for role/FSM-related logging expectations)
+**Console quick example:** `Memory.log = { default: "information" };` — more `Memory.log` recipes and the TypeScript logger API sketch: skill **`/managing-log-levels`** ([`.agents/skills/managing-log-levels/`](.agents/skills/managing-log-levels/)).
 
-**Levels** (strings in `Memory`, numbers in code): `error` → `information` → `verbose` → `debug`. Roughly: errors only; then `info` / `stat` / one **`moduleScope`** summary per block (includes **CPU ms** via `Game.cpu.getUsed()`—not `Game.time`, which is fixed inside a tick); then `path`; then `debugLazy` (callback skipped when off). Effective level: `Memory.log.modules[id]` → `Memory.log.default` → `createLogger`’s `defaultLevel`. Bad strings are ignored. Each logger caches the resolved level once per tick.
-
-**API sketch:**
-
-```ts
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
-log.error("…"); // always
-log.info("…");
-log.stat("name", 1); // information+
-log.path("…"); // verbose+
-log.debugLazy(() => `…`); // debug only
-log.moduleScope(
-  "label",
-  () => {},
-  () => ({ creeps: 3 }),
-); // optional endStats
-log.blankLineAfterTick(); // mainLoop: blank line between ticks (information+)
-```
-
-**Module ids** (for `Memory.log.modules`): `mainLoop`, `roomManager`, `spawnManager`, `harvester`, `upgrader`, `builder` (see `src/index.ts` and each file’s `LOG_MODULE`).
-
-**`Memory` examples** (Screeps console; persists until changed):
-
-```js
-Memory.log = { default: "information" }; // typical: scope + CPU lines
-Memory.log = { default: "error" }; // quiet
-Memory.log = { default: "verbose" }; // + path
-Memory.log = { default: "debug" }; // + debugLazy
-Memory.log = { default: "error", modules: { harvester: "debug" } }; // one subsystem loud
-delete Memory.log; // back to code defaults
-```
-
-More detail: **Logging conventions** in `AGENTS.md`, plus `src/roles/AGENTS.md` and `src/management/AGENTS.md`.
+For behavior-change safety (ticks, intents, **action priority matrix**, return codes): **`/checking-screeps-api`** — curated notes in [`docs/agent-references/screeps-api.md`](docs/agent-references/screeps-api.md). For role-related logging expectations: **`/adding-a-creep-role`**.
 
 ## Scripts
 
-- `npm run build` — bundle to `dist/`
-- `npm run typecheck` / `npm run lint` — quality checks
-- `npm run deploy` — build and upload (requires Screeps credentials; see [`.env.example`](.env.example))
+- `npm run typecheck` — TypeScript (`tsc --noEmit`)
+- `npm run watch` — `tsc --noEmit --watch` (typecheck while editing)
+- `npm run lint` / `npm run lint:fix` — ESLint; `--fix` applies safe fixes
+- `npm run format:check` / `npm run format` — Prettier check vs write
+- `npm run fix` — `lint:fix` then `format` (one-shot cleanup)
+- `npm run build` — `lint`, `format:check`, `typecheck`, then bundle to `dist/` via [`scripts/build.js`](scripts/build.js)
+- `npm run upload` — upload `dist/` only (uses [`scripts/run-upload.js`](scripts/run-upload.js); credentials: [`.env.example`](.env.example))
+- `npm run deploy` — `build` then `upload`
+
+Full verify/build/CI workflow: skill **`/building-and-deploying-screeps`** ([`.agents/skills/building-and-deploying-screeps/`](.agents/skills/building-and-deploying-screeps/)).
 
 ## CI and deploy
 

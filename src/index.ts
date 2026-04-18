@@ -1,5 +1,7 @@
 import { createLogger } from "./logging/logger";
 import { LogLevel } from "./logging/levels";
+import { buildCreepSnapshot } from "./management/creepSnapshot";
+import type { CreepSnapshot } from "./management/creepSnapshot";
 import {
   LOG_MODULE as creepMemoryGcModule,
   runDeadCreepMemoryCleanup,
@@ -46,18 +48,23 @@ const shuttleLogger = createLogger(shuttleModule, {
   defaultLevel: LogLevel.Information,
 });
 
-function countCreepsByRole(role: CreepMemory["role"]): number {
+/** Sums creep-array lengths across all room buckets for `moduleScope` stats. */
+function sumBucketRoleCount(
+  snap: CreepSnapshot,
+  roleKey: "harvesters" | "shuttles" | "upgraders" | "builders" | "repairers",
+): number {
   let n = 0;
-  for (const name in Game.creeps) {
-    const creep = Game.creeps[name];
-    if (creep?.memory.role === role) {
-      n++;
+  for (const roomName in snap.byRoom) {
+    const bucket = snap.byRoom[roomName];
+    if (bucket) {
+      n += bucket[roleKey].length;
     }
   }
   return n;
 }
 
 export const loop = (): void => {
+  let creepSnapshotForStats: CreepSnapshot | null = null;
   loopLogger.moduleScope(
     "tick",
     () => {
@@ -69,81 +76,96 @@ export const loop = (): void => {
         runRoomManagement();
       });
 
+      creepSnapshotForStats = buildCreepSnapshot();
+      const creepSnapshot = creepSnapshotForStats as CreepSnapshot;
+
       spawnLogger.moduleScope("runSpawnManagement", () => {
-        runSpawnManagement();
+        runSpawnManagement(creepSnapshot);
       });
 
       harvesterLogger.moduleScope(
         "rolePass",
         () => {
-          for (const name in Game.creeps) {
-            const creep = Game.creeps[name];
-            if (!creep || creep.memory.role !== "harvester") {
+          for (const roomName in creepSnapshot.byRoom) {
+            const bucket = creepSnapshot.byRoom[roomName];
+            if (!bucket) {
               continue;
             }
-            runHarvester(creep);
+            for (const creep of bucket.harvesters) {
+              runHarvester(creep);
+            }
           }
         },
-        () => ({ creeps: countCreepsByRole("harvester") }),
+        () => ({ creeps: sumBucketRoleCount(creepSnapshot, "harvesters") }),
       );
 
       upgraderLogger.moduleScope(
         "rolePass",
         () => {
-          for (const name in Game.creeps) {
-            const creep = Game.creeps[name];
-            if (!creep || creep.memory.role !== "upgrader") {
+          for (const roomName in creepSnapshot.byRoom) {
+            const bucket = creepSnapshot.byRoom[roomName];
+            if (!bucket) {
               continue;
             }
-            runUpgrader(creep);
+            for (const creep of bucket.upgraders) {
+              runUpgrader(creep);
+            }
           }
         },
-        () => ({ creeps: countCreepsByRole("upgrader") }),
+        () => ({ creeps: sumBucketRoleCount(creepSnapshot, "upgraders") }),
       );
 
       shuttleLogger.moduleScope(
         "rolePass",
         () => {
-          for (const name in Game.creeps) {
-            const creep = Game.creeps[name];
-            if (!creep || creep.memory.role !== "shuttle") {
+          for (const roomName in creepSnapshot.byRoom) {
+            const bucket = creepSnapshot.byRoom[roomName];
+            if (!bucket) {
               continue;
             }
-            runShuttle(creep);
+            for (const creep of bucket.shuttles) {
+              runShuttle(creep);
+            }
           }
         },
-        () => ({ creeps: countCreepsByRole("shuttle") }),
+        () => ({ creeps: sumBucketRoleCount(creepSnapshot, "shuttles") }),
       );
 
       builderLogger.moduleScope(
         "rolePass",
         () => {
-          for (const name in Game.creeps) {
-            const creep = Game.creeps[name];
-            if (!creep || creep.memory.role !== "builder") {
+          for (const roomName in creepSnapshot.byRoom) {
+            const bucket = creepSnapshot.byRoom[roomName];
+            if (!bucket) {
               continue;
             }
-            runBuilder(creep);
+            for (const creep of bucket.builders) {
+              runBuilder(creep);
+            }
           }
         },
-        () => ({ creeps: countCreepsByRole("builder") }),
+        () => ({ creeps: sumBucketRoleCount(creepSnapshot, "builders") }),
       );
 
       repairerLogger.moduleScope(
         "rolePass",
         () => {
-          for (const name in Game.creeps) {
-            const creep = Game.creeps[name];
-            if (!creep || creep.memory.role !== "repairer") {
+          for (const roomName in creepSnapshot.byRoom) {
+            const bucket = creepSnapshot.byRoom[roomName];
+            if (!bucket) {
               continue;
             }
-            runRepairer(creep);
+            for (const creep of bucket.repairers) {
+              runRepairer(creep);
+            }
           }
         },
-        () => ({ creeps: countCreepsByRole("repairer") }),
+        () => ({ creeps: sumBucketRoleCount(creepSnapshot, "repairers") }),
       );
     },
-    () => ({ creeps: Object.keys(Game.creeps).length }),
+    () => ({
+      creeps: creepSnapshotForStats?.totalCreepCount ?? 0,
+    }),
   );
   loopLogger.blankLineAfterTick();
 };

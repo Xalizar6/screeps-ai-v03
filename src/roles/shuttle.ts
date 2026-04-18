@@ -120,19 +120,21 @@ function resolveDeliveryTarget(creep: Creep): DeliveryTarget | null {
 
   const unfilled = getUnfilledEnergyStructures(creep.room);
   for (const structureType of DELIVERY_PRIORITY) {
-    const tier: DeliveryTarget[] = [];
+    let closest: DeliveryTarget | null = null;
+    let bestRange = Infinity;
     for (const structure of unfilled) {
       if (
-        isDeliveryTarget(structure) &&
-        structure.structureType === structureType
+        !isDeliveryTarget(structure) ||
+        structure.structureType !== structureType
       ) {
-        tier.push(structure);
+        continue;
+      }
+      const range = creep.pos.getRangeTo(structure.pos);
+      if (range < bestRange) {
+        bestRange = range;
+        closest = structure;
       }
     }
-    if (tier.length === 0) {
-      continue;
-    }
-    const closest = creep.pos.findClosestByPath(tier);
     if (closest) {
       creep.memory.targetId = closest.id;
       return closest;
