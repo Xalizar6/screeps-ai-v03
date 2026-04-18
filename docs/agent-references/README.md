@@ -15,6 +15,9 @@ This folder is the **shared reference library** and the **source of truth** for 
 
 ## What to read (quick index)
 
+- `jsdoc-conventions.md`
+  - **Module-scope JSDoc** expectations (summary, `@param` / `@returns`, side effects, exceptions). Root `AGENTS.md` points here for the full spec.
+
 - `screeps-overview.md`
   - Core concepts, **gameplay** assumptions (rooms, sources, spawns), and _where_ to put logic (role vs management vs main loop).
   - When changing **strategy** (expansion, economy cadence, room topology).
@@ -32,3 +35,14 @@ This folder is the **shared reference library** and the **source of truth** for 
 - Treat stored IDs as **soft references**: null-check results (objects disappear).
 - Keep references **curated**: add short project notes and links, not huge raw dumps.
 - **Routing rule:** scripting semantics → `screeps-api.md` + official Scripting links above; world/economy/defense rules → `screeps-overview.md` + official **Gameplay** docs (e.g. Introduction).
+
+## Where former root `AGENTS.md` detail lives
+
+| Topic                                       | Home                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Persona + step-by-step teaching style       | Skill **`/screeps-learning-loop`** — `.agents/skills/screeps-learning-loop/`          |
+| CI branches, workflows, secrets, upload env | [`README.md`](../../README.md) (CI and deploy), [`.env.example`](../../.env.example)  |
+| Full JSDoc rules and example block          | This folder — **`jsdoc-conventions.md`**                                              |
+| Screeps fundamentals + canonical links      | **Canonical Screeps documentation** above + `screeps-overview.md` / `screeps-api.md`  |
+| Role FSM, intent timing, logging per folder | `src/roles/AGENTS.md`, `src/management/AGENTS.md`, `src/logging/AGENTS.md`            |
+| Verify / build / deploy procedure           | [`README.md`](../../README.md) (Scripts), skill **`/building-and-deploying-screeps`** |

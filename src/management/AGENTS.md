@@ -26,7 +26,7 @@ These instructions apply when working in `src/management/`.
 
 ## JSDoc
 
-- Follow the **Documentation in code (JSDoc)** section in the root `AGENTS.md`.
+- Follow root [`AGENTS.md`](../../AGENTS.md) and **[`docs/agent-references/jsdoc-conventions.md`](../../docs/agent-references/jsdoc-conventions.md)**.
 - **Every** module-scope `function` / `const` helper in this folder should have at least a one-line `/** summary */` above it so construction and cache files read clearly when you are learning the flow.
 
 ## Logging

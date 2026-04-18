@@ -10,7 +10,7 @@ These instructions apply when working in `src/logging/` and when adding or chang
 
 ## JSDoc
 
-- Follow the **Documentation in code (JSDoc)** section in the root `AGENTS.md`. Each exported or internal helper here should have a one-line summary so level resolution and formatting stay approachable when you are new to the module.
+- Follow root [`AGENTS.md`](../../AGENTS.md) (one-line minimum per module-scope function) and **[`docs/agent-references/jsdoc-conventions.md`](../../docs/agent-references/jsdoc-conventions.md)** (full rules). Each exported or internal helper here should have a one-line summary so level resolution and formatting stay approachable when you are new to the module.
 
 ## `LOG_MODULE` (required for feature modules)
 

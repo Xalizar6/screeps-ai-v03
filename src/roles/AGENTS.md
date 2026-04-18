@@ -29,7 +29,7 @@ These instructions apply when working in `src/roles/`.
 
 ## JSDoc
 
-- Follow the **Documentation in code (JSDoc)** section in the root `AGENTS.md`.
+- Follow root [`AGENTS.md`](../../AGENTS.md) and **[`docs/agent-references/jsdoc-conventions.md`](../../docs/agent-references/jsdoc-conventions.md)**.
 - **Every** module-scope helper in a role file (state handlers, target resolvers, small guards) should have at least a one-line summary above it so the FSM reads top-to-bottom like a short tutorial.
 
 ## Logging

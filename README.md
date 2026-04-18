@@ -32,7 +32,7 @@ To add or evolve a role, use the project skill at `.agents/skills/adding-a-creep
 
 Logging lives in `src/logging/` (`createLogger`, levels, `Memory.log` resolution). Lines look like `[tick=…][moduleId][TAG] …`. Types for `Memory.log` are in `src/types.d.ts`.
 
-**Levels** (strings in `Memory`): `error` → `information` → `verbose` → `debug`. Effective level: `Memory.log.modules[id]` → `Memory.log.default` → logger default. See `AGENTS.md` and `src/logging/AGENTS.md` for full rules.
+**Levels** (strings in `Memory`): `error` → `information` → `verbose` → `debug`. Effective level: `Memory.log.modules[id]` → `Memory.log.default` → logger default. See [`AGENTS.md`](AGENTS.md) and [`src/logging/AGENTS.md`](src/logging/AGENTS.md) for logging rules; full **JSDoc** spec: [`docs/agent-references/jsdoc-conventions.md`](docs/agent-references/jsdoc-conventions.md).
 
 **Console quick example:** `Memory.log = { default: "information" };` — more `Memory.log` recipes and the TypeScript logger API sketch: skill **`/managing-log-levels`** ([`.agents/skills/managing-log-levels/`](.agents/skills/managing-log-levels/)).
 

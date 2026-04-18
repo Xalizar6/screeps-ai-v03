@@ -4,6 +4,8 @@ This folder tracks project-level skill strategy and pilot outcomes.
 
 Repo overview and contributor setup: [`README.md`](../README.md).
 
+- Always-on agent baseline: [`AGENTS.md`](../../AGENTS.md). Relocated detail index: [`docs/agent-references/README.md`](../agent-references/README.md) (includes **Where former root `AGENTS.md` detail lives**). Full JSDoc rules: [`docs/agent-references/jsdoc-conventions.md`](../agent-references/jsdoc-conventions.md).
+
 ## Purpose
 
 - `AGENTS.md` files define always-on standards.
@@ -66,7 +68,7 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 ### `screeps-learning-loop`
 
 - **Slash:** `/screeps-learning-loop`
-- **Purpose:** Teach-as-you-go implementation style with TypeScript rationale and human checkpoints.
+- **Purpose:** Teach-as-you-go implementation style with TypeScript rationale and human checkpoints. Applies **Senior Screeps Architect + TypeScript Tutor** persona while the skill is active (see skill body).
 - **Typical prompt language:** explain, learn, walk through, why this type, teaching mode (non-slash: use `/typescript-screeps-teach` for deeper-only).
 - **Source:** [`.agents/skills/screeps-learning-loop/SKILL.md`](../.agents/skills/screeps-learning-loop/SKILL.md)
 
