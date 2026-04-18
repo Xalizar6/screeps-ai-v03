@@ -95,6 +95,15 @@ Write the smallest possible test that proves/disproves your hypothesis:
 - **Missing await**: Forgetting `await` on async functions
 - **Environment mismatch**: Works locally, fails in CI/prod due to different env vars or versions
 
+## Screeps-specific debugging
+
+When debugging this repo’s in-game behavior:
+
+- Branch on **return codes** (`OK` vs `ERR_*`); log non-`OK` paths in behavior-sensitive code ([Debugging](https://docs.screeps.com/debugging.html)).
+- **`OK` does not guarantee** the outcome you expected — verify on the **next tick** or with small `Memory` watch fields / scoped logging.
+- Suspect **intent timing** or **action pipeline** conflicts? Read **Intent timing** and **Action priority matrix** in `docs/agent-references/screeps-api.md`.
+- Prefer repo loggers (`createLogger`) over raw `console.log` in hot paths unless temporarily debugging (see `src/logging/AGENTS.md`).
+
 ## Rules
 
 - Never guess — always verify with evidence

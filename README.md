@@ -36,7 +36,7 @@ Logging lives in `src/logging/` (`createLogger`, levels, `Memory.log` resolution
 
 **Console quick example:** `Memory.log = { default: "information" };` — more `Memory.log` recipes and the TypeScript logger API sketch: skill **`/managing-log-levels`** ([`.agents/skills/managing-log-levels/`](.agents/skills/managing-log-levels/)).
 
-For behavior-change safety (intents, return codes): **`/checking-screeps-api`**. For role-related logging expectations: **`/adding-a-creep-role`**.
+For behavior-change safety (ticks, intents, **action priority matrix**, return codes): **`/checking-screeps-api`** — curated notes in [`docs/agent-references/screeps-api.md`](docs/agent-references/screeps-api.md). For role-related logging expectations: **`/adding-a-creep-role`**.
 
 ## Scripts
 

@@ -24,8 +24,8 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 ### `checking-screeps-api`
 
 - **Slash:** `/checking-screeps-api`
-- **Purpose:** Validate Screeps API semantics before changing intents, return-code branches, or same-tick `creep.store` assumptions; use local notes then canonical API when unsure.
-- **Typical prompt language:** `intent timing`, `same tick`, `creep.store`, `ERR_NOT_IN_RANGE`, `ERR_BUSY`, `transfer` / `withdraw` / `pickup`, `Game.getObjectById`.
+- **Purpose:** Validate Screeps runtime semantics: tick/intent model, **action priority matrix**, return codes, same-tick `creep.store`, `Game`/`Memory`, CPU bucket, debugging expectations. Read `docs/agent-references/screeps-api.md` first; use the skill’s canonical doc map, then `https://docs.screeps.com/api/` when needed.
+- **Typical prompt language:** `intent timing`, `same tick`, `creep.store`, `pipeline`, `simultaneous`, `ERR_NOT_IN_RANGE`, `ERR_BUSY`, `transfer` / `withdraw` / `pickup`, `Game.getObjectById`, `Game.cpu.bucket`.
 - **Source:** [`.agents/skills/checking-screeps-api/SKILL.md`](../.agents/skills/checking-screeps-api/SKILL.md)
 
 ### `screeps-management-change`

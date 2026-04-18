@@ -12,7 +12,9 @@ description: Review hot tick paths for CPU-heavy Screeps patterns. Use when prof
 3. Avoid repeated `Object.values(Game.creeps)` in hot paths unless necessary.
 4. Use `moduleScope` summaries at `information` level to spot per-pass CPU deltas in logs.
 5. Align with root `AGENTS.md` CPU expectations.
+6. For **bursty** expensive work, check `Game.cpu.bucket` / `Game.cpu.tickLimit` — defer heavy pathing or scans when the bucket is low ([CPU limit](https://docs.screeps.com/cpu-limit.html), **CPU limit and bucket** in `docs/agent-references/screeps-api.md`).
 
 ## References
 
 - [hot-path-patterns.md](references/hot-path-patterns.md)
+- `docs/agent-references/screeps-api.md` (CPU bucket section)

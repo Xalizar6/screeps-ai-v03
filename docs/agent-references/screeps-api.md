@@ -2,7 +2,52 @@
 
 Source: `https://docs.screeps.com/api/`
 
-This doc is **not** a full API mirror. It’s a curated set of API details and patterns that are frequently relevant while implementing behaviors in this repo.
+This doc is **not** a full API mirror. It’s a curated set of API details and patterns that are frequently relevant while implementing behaviors in this repo. For **tick model, intents, and world state timing**, see [Understanding game loop, time and ticks](https://docs.screeps.com/game-loop.html).
+
+## Game loop and intents (scripting fundamentals)
+
+From [Game loop](https://docs.screeps.com/game-loop.html):
+
+- At the **start** of a tick, the world has a fixed snapshot (object positions, stores, etc.).
+- During the tick, your `main` runs against that snapshot; **property changes from your commands apply at the start of the next tick** (e.g. position after `move` is not updated same-tick for later code in the same tick).
+- At **end** of tick, queued intents are applied; conflicts are resolved by engine rules (see [Simultaneous actions](https://docs.screeps.com/simultaneous-actions.html)).
+- **`Game.time`** is the global tick counter; the next tick begins only after all players’ scripts finish for the current tick.
+- Runtime globals are **recreated each tick**; only **`Memory`** persists across ticks (see [Global objects](https://docs.screeps.com/global-objects.html)).
+
+## Action priority matrix (simultaneous creep actions)
+
+Canonical reference: [Simultaneous execution of creep actions](https://docs.screeps.com/simultaneous-actions.html) (includes `action-priorities.png`).
+
+The following pipelines and rules match the official documentation (verbatim priority order left → right means **rightmost wins** when the same pipeline conflicts).
+
+### Pipeline 1
+
+`harvest` > `attack` > `build` > `repair` > `dismantle` > `attackController` > `rangedHeal` > `heal`
+
+### Pipeline 2
+
+`rangedAttack` > `rangedMassAttack` > `build` > `repair` > `rangedHeal`
+
+### Pipeline 3
+
+`upgradeController` > `build` or `repair` > `withdraw` > `transfer` > `drop`
+
+### Rules
+
+- **Pipelines 1 and 2:** Only the **most right** method in that pipeline executes for the tick, even if multiple methods in the same pipeline would return `OK`.
+- **Cross-pipeline:** You may execute multiple methods by combining methods from **different** pipelines in one tick (including methods like `moveTo` that are **not** in the dependency pipelines above).
+- **Pipeline 3:** If there is **enough energy** for all scheduled operations in that pipeline, **all** execute; otherwise a conflict arises and only the **most right** one executes.
+- **Same method more than once:** The **last** call wins for that method (e.g. multiple `move` / `moveTo` — only the last movement intent applies).
+
+### Project interpretation
+
+- Avoid issuing two dependent actions from the **same** pipeline in one role tick unless you intend the rightmost to win.
+- Methods that return `OK` can still be **senseless** (e.g. heal full creep) and **block** more-left methods in the same pipeline per official docs.
+- You cannot execute the **same** method type multiple times per tick for different targets where the docs forbid it (e.g. multiple `transfer` to different objects) — see official “Additionally” section.
+
+### Carry snapshot
+
+Simultaneous `CARRY`-related methods each see the energy available **at the beginning of the tick**; see [Simultaneous actions](https://docs.screeps.com/simultaneous-actions.html) and [Game loop](https://docs.screeps.com/game-loop.html).
 
 ## Frequently used globals
 
@@ -10,10 +55,38 @@ This doc is **not** a full API mirror. It’s a curated set of API details and p
   - `Game.creeps`, `Game.rooms`, `Game.spawns`
   - `Game.time`
   - `Game.getObjectById<T>(id)` for resolving stored IDs
+  - `Game.cpu.limit`, `Game.cpu.tickLimit`, `Game.cpu.bucket` — see [CPU limit](#cpu-limit-and-bucket) below
 
 - `Memory`
   - Persistent JSON-like store.
   - Use typed interfaces in this repo (extend `CreepMemory`, `RoomMemory`, etc.).
+
+## Global objects: `Game` vs `Memory`
+
+From [Global objects](https://docs.screeps.com/global-objects.html):
+
+- **`Game`** is built fresh each tick; mutating arbitrary properties on it does **not** persist game state — only **methods** on game objects enqueue real intents.
+- **`Memory`** persists between ticks as JSON-serializable data (no functions, no live object references).
+- **`Memory` writes are visible immediately within the same tick** (later code in the same script execution can read updated values), but game-object intent effects still resolve at tick boundaries.
+- **Do not** store live game objects in `Memory`; store **`id`** strings and resolve with `Game.getObjectById`.
+- **`Memory` is limited** (official cap 2 MB); keep payloads intentional.
+- First access to `Memory` in a tick triggers parse cost (CPU charged to your script); keep reads/writes lean where hot.
+
+## CPU limit and bucket
+
+From [How does CPU limit work](https://docs.screeps.com/cpu-limit.html):
+
+- **`Game.cpu.limit`:** Account baseline CPU ms per tick (depends on GCL / unlock, etc.).
+- **`Game.cpu.bucket`:** Unused baseline under the limit rolls into a bucket (max **10,000**).
+- **`Game.cpu.tickLimit`:** Effective ceiling for **this** tick — can exceed `limit` when bucket allows burst spend (up to **+500** from bucket when full, per docs).
+- Use bucket-aware scheduling for **bursty** work (e.g. heavy `PathFinder` or one-off room scans): defer to ticks with headroom.
+
+## Debugging
+
+From [Debugging](https://docs.screeps.com/debugging.html):
+
+- Use `console.log` for console output; check return codes (`OK` vs `ERR_*`).
+- A return of `OK` does not guarantee the outcome you expected if the world changed or intents conflicted — verify on the **next** tick or with targeted logging / `Memory` watch keys.
 
 ## Soft references: `Game.getObjectById`
 

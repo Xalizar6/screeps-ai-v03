@@ -20,7 +20,8 @@ These instructions apply when working in `src/roles/`.
 - Store durable references (IDs) in memory when it prevents repeated searches (source IDs, container IDs, target IDs).
 - Always handle missing objects from `Game.getObjectById(...)` (it can return `null`).
 - When adding FSM fields, extend `CreepMemory` in `src/types.d.ts` and document which states each role uses.
-- Do not gate FSM transitions on `creep.store` immediately after `transfer` / `withdraw` / `pickup` — those intents resolve at end-of-tick; `store` may still show pre-intent values. Prefer store checks at the **top** of the next handler pass (see **Intent timing** in `docs/agent-references/screeps-api.md`).
+- Do not gate FSM transitions on `creep.store` immediately after `transfer` / `withdraw` / `pickup` — intents resolve at end-of-tick; prefer store checks at the **top** of the handler (see **Intent timing** in `docs/agent-references/screeps-api.md`).
+- Do not issue **two dependent actions from the same official pipeline** in one tick unless you intend the **rightmost** to win; see **Action priority matrix** in `docs/agent-references/screeps-api.md` and [Simultaneous actions](https://docs.screeps.com/simultaneous-actions.html). Verify behavior next tick if return codes look `OK` but the creep did not act as expected.
 
 ## TypeScript expectations
 
@@ -41,5 +42,5 @@ These instructions apply when working in `src/roles/`.
 
 When implementing or adjusting role behavior, consult:
 
-- `docs/agent-references/screeps-api.md` (action primitives, return codes, `Game.getObjectById`)
-- `docs/agent-references/screeps-overview.md` (where logic belongs, performance basics)
+- `docs/agent-references/screeps-api.md` (action priority matrix, intent timing, return codes, `Game.getObjectById`)
+- `docs/agent-references/screeps-overview.md` (where logic belongs, performance basics, gameplay pointers)

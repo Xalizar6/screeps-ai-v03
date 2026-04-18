@@ -91,15 +91,23 @@ Keep documentation edits scoped to what the code change actually affects; avoid 
 
 ## Reference material
 
-When you need Screeps gameplay or API details, consult the shared reference library:
+When you need Screeps gameplay or API details, consult the shared reference library first (`docs/agent-references/README.md` — index and routing rules):
 
-- `docs/agent-references/README.md`
-- `docs/agent-references/screeps-overview.md`
-- `docs/agent-references/screeps-api.md`
+- `docs/agent-references/screeps-overview.md` — gameplay + architecture context; start here for **world rules** (rooms, sources, spawns).
+- `docs/agent-references/screeps-api.md` — **source of truth** for tick/intent timing, **action priority matrix**, `Game`/`Memory`, CPU bucket, return codes.
 - `docs/agent-references/external-example-codebases.md` (optional third-party example bots; not part of this repo)
+
+### Fundamental Screeps behavior (consult before risky changes)
+
+- **Ticks & intents:** state updates from your commands apply at tick boundaries; see [Game loop](https://docs.screeps.com/game-loop.html) and `screeps-api.md`.
+- **Same-tick creep actions:** dependency pipelines and “rightmost wins”; see [Simultaneous actions](https://docs.screeps.com/simultaneous-actions.html) and the matrix in `screeps-api.md`.
+- **`Game` vs `Memory`:** no live objects in `Memory`; IDs + `Game.getObjectById`; see [Global objects](https://docs.screeps.com/global-objects.html).
+- **CPU:** `limit`, `tickLimit`, `bucket` and burst rules; see [CPU limit](https://docs.screeps.com/cpu-limit.html) and `screeps-api.md`.
+- **Debugging:** branch on return codes; verify outcomes next tick when unsure; see [Debugging](https://docs.screeps.com/debugging.html).
+- **Gameplay / strategy** (expansion, room topology, source regen, spawn limits): read [Introduction](https://docs.screeps.com/introduction.html) and `screeps-overview.md`, not only the API reference.
 
 Canonical Screeps docs: `https://docs.screeps.com/index.html` and API reference `https://docs.screeps.com/api/`.
 
-Before changing creep actions, intents, CPU usage, or memory contracts, **read the linked references first** (local notes plus canonical API when behavior is not spelled out in-repo). Do not assume intent rules (for example one intent per action type per tick, movement as a separate intent, or return codes such as `ERR_BUSY` / `ERR_NOT_IN_RANGE`). If a change depends on exact API behavior and local notes do not cover it, confirm against `https://docs.screeps.com/api/` and cite that source in plans or PRs.
+Before changing creep actions, intents, CPU usage, or memory contracts, **read `screeps-api.md` (and gameplay refs if strategy changes)**. Do not assume timing or priority without checking docs. If local notes are insufficient, confirm against the canonical pages above or `https://docs.screeps.com/api/` and cite the source in plans or PRs.
 
 Use these as supporting references, but follow this `AGENTS.md` file for **repo-specific standards**.

@@ -18,6 +18,8 @@ Use when working under `src/management/`.
 ## References
 
 - [checklist.md](references/checklist.md)
+- `docs/agent-references/screeps-api.md` (room queries, CPU bucket, soft references)
+- `docs/agent-references/screeps-overview.md` (gameplay assumptions, data flow)
 
 ## Human-in-the-Loop Checkpoint
 

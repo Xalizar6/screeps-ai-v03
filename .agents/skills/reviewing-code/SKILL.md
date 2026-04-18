@@ -62,7 +62,7 @@ For each finding, include the file, line, the issue, and a suggested fix.
 
 ## Screeps-specific lens
 
-When reviewing this repo, also check: intent timing assumptions, `Memory` typing, `LOG_MODULE` usage, and CPU-heavy `room.find` patterns per `AGENTS.md`.
+When reviewing this repo, also check: intent timing and **action pipeline** assumptions (`docs/agent-references/screeps-api.md`), `Memory` typing, `LOG_MODULE` usage, and CPU-heavy `room.find` patterns per `AGENTS.md`.
 
 ## Attribution
 

@@ -8,7 +8,7 @@ Use with `subagent_type: "explore"` (read-only). Adjust thoroughness as needed.
 
 **Agent 2 — Roles and FSM**
 
-> Summarize `src/roles/*.ts`, `fsm.ts`, `energyAcquisition.ts`: how FSM state is stored in `CreepMemory`, shared helpers, intent-timing assumptions documented in code or comments.
+> Summarize `src/roles/*.ts`, `fsm.ts`, `energyAcquisition.ts`: how FSM state is stored in `CreepMemory`, shared helpers, and how intent timing / action pipelines align with `docs/agent-references/screeps-api.md`.
 
 **Agent 3 — Management**
 
