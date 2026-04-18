@@ -1,8 +1,12 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
-import { acquireEnergy } from "./energyAcquisition";
+import {
+  acquireEnergy,
+  tryAdjacentControllerContainerTopUp,
+} from "./energyAcquisition";
 import {
   getObjectByIdOrNull,
+  isEnergyBelowWorkTopUpThreshold,
   isStoreEmpty,
   isStoreFull,
   runFsm,
@@ -99,8 +103,13 @@ function runHarvest(creep: Creep): void {
   }
 }
 
+/** Upgrades the controller; when carry is low, attempts adjacent controller-container withdraw then upgrade (pipeline 3). */
 function runUpgrade(creep: Creep): void {
-  if (isStoreEmpty(creep)) {
+  if (
+    isEnergyBelowWorkTopUpThreshold(creep) &&
+    !tryAdjacentControllerContainerTopUp(creep) &&
+    isStoreEmpty(creep)
+  ) {
     transitionState(creep, "harvest");
     return;
   }

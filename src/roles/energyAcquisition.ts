@@ -223,6 +223,42 @@ export function tryAdjacentWorkStateEnergyTopUp(creep: Creep): boolean {
 }
 
 /**
+ * Adjacent-only withdraw from `RoomMemory.controllerContainerId` for upgrader
+ * work-state top-up. Does not use `creep.memory.targetId` (upgraders cache the
+ * controller there in `upgrade` state).
+ *
+ * With `upgradeController`, both sit in pipeline 3: when the carry snapshot has
+ * enough energy for all scheduled pipeline-3 intents, they can all execute; only
+ * on shortage does the rightmost win over more-left intents (see
+ * `docs/agent-references/screeps-api.md` and Simultaneous actions docs).
+ *
+ * @returns true if a withdraw was attempted this tick.
+ */
+export function tryAdjacentControllerContainerTopUp(creep: Creep): boolean {
+  const need = creep.store.getFreeCapacity(RESOURCE_ENERGY);
+  if (need <= 0) {
+    return false;
+  }
+  const raw = getObjectByIdOrNull<StructureContainer>(
+    creep.room.memory.controllerContainerId,
+  );
+  if (
+    !(raw instanceof StructureContainer) ||
+    !creep.pos.inRangeTo(raw.pos, 1) ||
+    raw.store[RESOURCE_ENERGY] <= 0
+  ) {
+    return false;
+  }
+  const result = creep.withdraw(raw, RESOURCE_ENERGY);
+  log.path(`${creep.name} branch=upgrader_controller_container_topup`);
+  log.debugLazy(
+    () =>
+      `${creep.name} action=withdraw container=${raw.id} result=${result} controllerTopUp`,
+  );
+  return true;
+}
+
+/**
  * Acquire energy: withdraw from source-adjacent containers (if enough energy),
  * else pickup dropped energy near sources, else harvest from an active source.
  */
