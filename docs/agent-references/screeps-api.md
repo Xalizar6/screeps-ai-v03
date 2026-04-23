@@ -20,6 +20,11 @@ Canonical reference: [Simultaneous execution of creep actions](https://docs.scre
 
 The following pipelines and rules match the official documentation (verbatim priority order left → right means **rightmost wins** when the same pipeline conflicts).
 
+### Two goals (keep separate)
+
+1. **Intent timing / `creep.store`:** Do not assume `creep.store` (or other intent-driven world state) updates **during** your script after you call `withdraw`, `transfer`, `pickup`, etc. Effects apply at **tick end**; see [Intent timing and `creep.store` within a tick](#intent-timing-and-creepstore-within-a-tick). This is **orthogonal** to pipeline rules.
+2. **Same pipeline, multiple methods:** Know how **pipelines 1–2** differ from **pipeline 3**. Pipelines 1 and 2 always resolve to a **single** winning method (rightmost). Pipeline 3 may run **several** methods in one tick when the official **energy** conditions are met; otherwise pipeline 3 also falls back to **rightmost wins**. For simultaneous `CARRY` work in pipeline 3, adjudication uses the **beginning-of-tick** carry snapshot per official docs—not “whatever `creep.store` looks like after your earlier lines of code this tick.”
+
 ### Pipeline 1
 
 `harvest` > `attack` > `build` > `repair` > `dismantle` > `attackController` > `rangedHeal` > `heal`
@@ -41,13 +46,14 @@ The following pipelines and rules match the official documentation (verbatim pri
 
 ### Project interpretation
 
-- Avoid issuing two dependent actions from the **same** pipeline in one role tick unless you intend the rightmost to win.
+- **Pipelines 1 and 2:** Treat multiple methods in the **same** pipeline as mutually exclusive for that tick: only the **rightmost** runs. Do not expect a “left” method and a “right” method both to apply.
+- **Pipeline 3:** Multiple methods **can** all run in one tick when official rules say there is **enough energy** for the combined pipeline‑3 work; if not, only the **rightmost** runs. Combinations such as adjacent `withdraw` (buffer) then `upgradeController` are **not** disallowed by “same pipeline” alone—they follow the same official energy and conflict rules. **Still** do not branch FSM or capacity logic on **same-tick** `creep.store` after those calls (goal 1).
 - Methods that return `OK` can still be **senseless** (e.g. heal full creep) and **block** more-left methods in the same pipeline per official docs.
 - You cannot execute the **same** method type multiple times per tick for different targets where the docs forbid it (e.g. multiple `transfer` to different objects) — see official “Additionally” section.
 
 ### Carry snapshot
 
-Simultaneous `CARRY`-related methods each see the energy available **at the beginning of the tick**; see [Simultaneous actions](https://docs.screeps.com/simultaneous-actions.html) and [Game loop](https://docs.screeps.com/game-loop.html).
+Simultaneous `CARRY`-related methods each see the energy available **at the beginning of the tick** (for how pipeline‑3 combinations are resolved); see [Simultaneous actions](https://docs.screeps.com/simultaneous-actions.html) and [Game loop](https://docs.screeps.com/game-loop.html). That is **not** the same as reading `creep.store` mid-script and assuming it already reflects a `withdraw` you just queued (see [Intent timing and `creep.store` within a tick](#intent-timing-and-creepstore-within-a-tick)).
 
 ## Frequently used globals
 
@@ -120,6 +126,8 @@ Common pattern:
 - If invalid target, clear cached ID and re-select
 
 ## Intent timing and `creep.store` within a tick
+
+This section is **goal 1** in [Two goals (keep separate)](#two-goals-keep-separate): same-tick **`creep.store`** vs **pipeline conflict rules** (goal 2) are different topics.
 
 Screeps actions are **intents** queued on the creep and resolved at end-of-tick (see [game loop](https://docs.screeps.com/game-loop.html) and [API](https://docs.screeps.com/api/)). Practical implications for role logic:
 
