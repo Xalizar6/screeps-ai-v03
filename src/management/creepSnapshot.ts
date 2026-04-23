@@ -4,7 +4,7 @@ import { countBodyParts } from "./shuttleDemand";
 export interface RoomCreepBuckets {
   harvesters: Creep[];
   shuttles: Creep[];
-  /** Shuttles in this room that are not spawning (matches prior harvester shuttle gating). */
+  /** Shuttles in this room that are not spawning (e.g. spawn demand). Harvester gating uses {@link getShuttleCreepCountInRoom}. */
   shuttlesActive: number;
   upgraders: Creep[];
   /** Sum of `WORK` parts on upgraders in this room (for shuttle demand). */
@@ -89,6 +89,15 @@ export function buildCreepSnapshot(): CreepSnapshot {
  */
 export function getActiveShuttleCountInRoom(roomName: string): number {
   return snapshotForTick?.byRoom[roomName]?.shuttlesActive ?? 0;
+}
+
+/**
+ * Shuttle creeps in a room from the last `buildCreepSnapshot()` (includes `creep.spawning`).
+ * Use for harvester fallback gating so a shuttle on the pad still counts as logistics present.
+ * For “can act this tick” use {@link getActiveShuttleCountInRoom} / `shuttlesActive`.
+ */
+export function getShuttleCreepCountInRoom(roomName: string): number {
+  return snapshotForTick?.byRoom[roomName]?.shuttles.length ?? 0;
 }
 
 /**

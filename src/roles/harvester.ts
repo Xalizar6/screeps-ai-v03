@@ -1,6 +1,6 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
-import { getActiveShuttleCountInRoom } from "../management/creepSnapshot";
+import { getShuttleCreepCountInRoom } from "../management/creepSnapshot";
 import {
   isStoreEmpty,
   isStoreFull,
@@ -88,9 +88,20 @@ function resolveFallbackDeliveryTarget(
   return null;
 }
 
+function roomHasEnergyAcceptingSpawnOrExtensions(room: Room): boolean {
+  return (
+    room.find(FIND_MY_STRUCTURES, {
+      filter: (structure) =>
+        (structure.structureType === STRUCTURE_SPAWN ||
+          structure.structureType === STRUCTURE_EXTENSION) &&
+        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+    }).length > 0
+  );
+}
+
 function runHarvest(creep: Creep): void {
-  const shuttleCount = getActiveShuttleCountInRoom(creep.room.name);
-  if (shuttleCount === 0 && isStoreFull(creep)) {
+  const shuttleCreeps = getShuttleCreepCountInRoom(creep.room.name);
+  if (shuttleCreeps === 0 && isStoreFull(creep)) {
     transitionState(creep, "deliver");
     return;
   }
@@ -101,7 +112,11 @@ function runHarvest(creep: Creep): void {
     return;
   }
 
-  const container = resolveSourceContainer(creep, source);
+  const sourceContainer = resolveSourceContainer(creep, source);
+  const emergency =
+    shuttleCreeps === 0 && roomHasEnergyAcceptingSpawnOrExtensions(creep.room);
+  const container = emergency ? null : sourceContainer;
+
   if (container) {
     if (!creep.pos.isEqualTo(container.pos)) {
       const move = creep.moveTo(container);
@@ -129,7 +144,9 @@ function runHarvest(creep: Creep): void {
     return;
   }
 
-  log.path(`${creep.name} branch=mine_source`);
+  log.path(
+    `${creep.name} branch=${emergency ? "emergency_mine_source" : "mine_source"}`,
+  );
   const harvest = creep.harvest(source);
   log.debugLazy(
     () => `${creep.name} action=harvest source=${source.id} result=${harvest}`,
@@ -143,7 +160,7 @@ function runHarvest(creep: Creep): void {
         () =>
           `${creep.name} action=transfer container=${container.id} amount=${carried} result=${transfer}`,
       );
-    } else {
+    } else if (!emergency) {
       const dropped = creep.drop(RESOURCE_ENERGY);
       log.debugLazy(
         () => `${creep.name} action=drop amount=${carried} result=${dropped}`,
@@ -151,13 +168,13 @@ function runHarvest(creep: Creep): void {
     }
   }
 
-  if (shuttleCount === 0 && isStoreFull(creep)) {
+  if (shuttleCreeps === 0 && isStoreFull(creep)) {
     transitionState(creep, "deliver");
   }
 }
 
 function runDeliver(creep: Creep): void {
-  if (getActiveShuttleCountInRoom(creep.room.name) > 0) {
+  if (getShuttleCreepCountInRoom(creep.room.name) > 0) {
     transitionState(creep, "harvest");
     return;
   }

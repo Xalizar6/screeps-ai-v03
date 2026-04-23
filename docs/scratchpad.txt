@@ -42,7 +42,7 @@ Screeps console commands
                 structureCache: "debug",
                 roomManager: "debug",
                 spawnManager: "debug",
-                energyAcquisition: "debug", 
+                energyAcquisition: "information", 
             } };
 
         delete Memory.log; // back to code defaults
