@@ -1,6 +1,9 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
-import { CONSTRUCTION_PLAN_INTERVAL } from "./roomConstruction";
+import {
+  CONSTRUCTION_PLAN_INTERVAL,
+  CONTROLLER_BUFFER_CONTAINER_RANGE,
+} from "./roomConstruction";
 
 export const LOG_MODULE = "roomCache" as const;
 
@@ -28,10 +31,14 @@ function pickContainerNearSource(
 function pickContainerNearController(
   controller: StructureController,
 ): StructureContainer | undefined {
-  const structures = controller.pos.findInRange(FIND_STRUCTURES, 2, {
-    filter: (s): s is StructureContainer =>
-      s.structureType === STRUCTURE_CONTAINER,
-  });
+  const structures = controller.pos.findInRange(
+    FIND_STRUCTURES,
+    CONTROLLER_BUFFER_CONTAINER_RANGE,
+    {
+      filter: (s): s is StructureContainer =>
+        s.structureType === STRUCTURE_CONTAINER,
+    },
+  );
   if (structures.length === 0) {
     return undefined;
   }

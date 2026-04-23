@@ -152,6 +152,7 @@ function resolveDeliveryTarget(creep: Creep): DeliveryTarget | null {
 
 /**
  * Resolves the controller buffer container for delivery-only state (no spawn/extension/tower pass).
+ * Target is `RoomMemory.controllerContainerId` (see `roomConstruction` / `roomCache`).
  */
 function resolveControllerDeliveryTarget(
   creep: Creep,
@@ -240,7 +241,7 @@ function runDeliver(creep: Creep): void {
 }
 
 /**
- * Delivers only to the controller buffer container; pivots to `deliver` if spawn/extensions/towers need energy.
+ * Delivers only to the controller buffer container (`controllerContainerId`); pivots to `deliver` if spawn/extensions/towers need energy.
  * @remarks Transfer return codes do not gate FSM transitions; empty/full checks run at handler entry only.
  */
 function runDeliverController(creep: Creep): void {
