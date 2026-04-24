@@ -31,7 +31,20 @@ Screeps console commands
         Memory.log = { default: "verbose" }; // + path
         Memory.log = { default: "debug" }; // + debugLazy
         Memory.log = { default: "information", modules: {shuttle: "debug" } }; // one subsystem loud
-        Memory.log = { default: "information", modules: {shuttle: "debug", energyAcquisition: "debug", } }; // one subsystem loud
+        Memory.log = { default: "information", 
+            modules: {
+                harvester: "debug",
+                shuttle: "information",
+                upgrader: "information",
+                builder: "information",
+                repairer: "information",
+                roomCache: "debug",
+                structureCache: "debug",
+                roomManager: "debug",
+                spawnManager: "debug",
+                energyAcquisition: "information", 
+            } };
+
         delete Memory.log; // back to code defaults
 
     Signage

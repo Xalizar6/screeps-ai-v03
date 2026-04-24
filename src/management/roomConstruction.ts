@@ -6,6 +6,12 @@ export const LOG_MODULE = "roomConstruction" as const;
 /** Run source/controller container planning only when `Game.time % this === 0` (see `roomManager`). */
 export const CONSTRUCTION_PLAN_INTERVAL = 100;
 
+/**
+ * Chebyshev radius from the controller for buffer container sites and for `roomCache` discovery.
+ * Path placement uses step index `CONTROLLER_BUFFER_CONTAINER_RANGE - 1` along PathFinder toward the nearest source.
+ */
+export const CONTROLLER_BUFFER_CONTAINER_RANGE = 3;
+
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 const PATHFINDER_MAX_OPS = 4000;
@@ -161,8 +167,8 @@ function planContainerNearSource(room: Room, source: Source): void {
 }
 
 /**
- * Place a controller container ~2 tiles from the controller, biased toward
- * the closest source. Reuses `sources` from the caller to avoid a second `FIND_SOURCES`.
+ * Place a controller buffer container ~{@link CONTROLLER_BUFFER_CONTAINER_RANGE} steps along the path from the controller toward the closest source.
+ * Reuses `sources` from the caller to avoid a second `FIND_SOURCES`.
  * @param room Owned room
  * @param sources Same array as used for per-source container planning this tick
  */
@@ -174,7 +180,11 @@ function planContainerNearController(room: Room, sources: Source[]): void {
   if (
     (room.memory.controllerContainerId &&
       Game.getObjectById(room.memory.controllerContainerId)) ||
-    hasContainerOrSiteInRange(room, controller.pos, 2)
+    hasContainerOrSiteInRange(
+      room,
+      controller.pos,
+      CONTROLLER_BUFFER_CONTAINER_RANGE,
+    )
   ) {
     return;
   }
@@ -195,10 +205,11 @@ function planContainerNearController(room: Room, sources: Source[]): void {
       swampCost: 10,
     },
   );
-  if (result.incomplete || result.path.length < 2) {
+  const pathIndex = CONTROLLER_BUFFER_CONTAINER_RANGE - 1;
+  if (result.incomplete || result.path.length <= pathIndex) {
     return;
   }
-  const chosen = result.path[1];
+  const chosen = result.path[pathIndex];
   if (!chosen) {
     return;
   }

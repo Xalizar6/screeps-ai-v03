@@ -62,6 +62,6 @@ interface RoomMemory {
   myConstructionSiteCount?: number;
   /** Source IDs -> nearby container cache; maintained by `src/management/roomCache.ts`. */
   sources?: Record<Id<Source>, SourceMemory>;
-  /** Container near the room controller for upgrader supply; maintained by `src/management/roomCache.ts`. */
+  /** Controller buffer container within scan/plan radius of the controller; see `roomCache` / `roomConstruction`. */
   controllerContainerId?: Id<StructureContainer>;
 }

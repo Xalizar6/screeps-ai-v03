@@ -28,8 +28,8 @@ function ensureState(creep: Creep): UpgraderState {
 }
 
 /**
- * Resolves the room-cached controller-adjacent container when it exists and holds energy.
- * Uses `RoomMemory.controllerContainerId` (maintained by `roomCache`) so upgraders avoid repeated `find` scans.
+ * Resolves the room-cached controller buffer container when it exists and holds energy.
+ * Uses `RoomMemory.controllerContainerId` (planned offset in `roomConstruction`, scan radius in `roomCache`).
  */
 function resolveViableControllerContainer(
   room: Room,
@@ -103,7 +103,7 @@ function runHarvest(creep: Creep): void {
   }
 }
 
-/** Upgrades the controller; when carry is low, attempts adjacent controller-container withdraw then upgrade (pipeline 3). */
+/** Upgrades the controller; when carry is low, attempts adjacent buffer-container withdraw then upgrade (pipeline 3). */
 function runUpgrade(creep: Creep): void {
   if (
     isEnergyBelowWorkTopUpThreshold(creep) &&
