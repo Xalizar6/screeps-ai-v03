@@ -46,8 +46,13 @@ For behavior-change safety (ticks, intents, **action priority matrix**, return c
 - `npm run format:check` / `npm run format` — Prettier check vs write
 - `npm run fix` — `lint:fix` then `format` (one-shot cleanup)
 - `npm run build` — `lint`, `format:check`, `typecheck`, then bundle to `dist/` via [`scripts/build.js`](scripts/build.js)
-- `npm run upload` — upload `dist/` only (uses [`scripts/run-upload.js`](scripts/run-upload.js); credentials: [`.env.example`](.env.example))
+- `npm run upload` — upload `dist/` only (uses [`scripts/run-upload.js`](scripts/run-upload.js); reads repo-root `.env` if present). Env file values **override** the current shell for keys you set in the file, so you can run `upload` then `upload:ptr` in the same session without stale `SCREEPS_*` leaking between targets. Credentials: [`.env.example`](.env.example).
+- `npm run upload:ptr` — same, but uses `.env.ptr` when that file exists (`upload` with a different env filename).
+- `npm run upload -- .env.<profile>` — generic: after `--`, pass another env file path (e.g. `npm run upload -- .env.community`). Duplicate the `SCREEPS_*` lines you need in each profile; keys missing from a profile file still come from the shell.
 - `npm run deploy` — `build` then `upload`
+- `npm run deploy:ptr` — `build` then `upload:ptr`
+
+For official PTR, set `SCREEPS_HOST=screeps.com/ptr` (path prefix; not `SCREEPS_BRANCH=ptr` on bare `screeps.com`, which targets the live server). See [`.env.example`](.env.example).
 
 Full verify/build/CI workflow: skill **`/building-and-deploying-screeps`** ([`.agents/skills/building-and-deploying-screeps/`](.agents/skills/building-and-deploying-screeps/)).
 
@@ -62,4 +67,4 @@ GitHub Actions builds (`npm run build`) then uploads `dist/main.js` via [`script
 
 `SCREEPS_BRANCH` in CI is the branch tab in the Screeps code editor on that server, not the git branch name. Official releases: push or merge to `main`. Try changes on the community server by pushing to `test`. Upload script env: **`SCREEPS_PROTOCOL`** / **`SCREEPS_PORT`** (see [`.env.example`](.env.example)).
 
-**Credentials and git:** never commit passwords, tokens, or `.env`. Use [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for CI. Locally, `npm run upload` loads a repo-root `.env` **only if that file exists** (via [`scripts/run-upload.js`](scripts/run-upload.js)); CI has no `.env` and uses the workflow `env` block. You can still rely on shell-exported variables instead of `.env`.
+**Credentials and git:** never commit passwords, tokens, or `.env`. Use [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions) for CI. Locally, `npm run upload` loads a repo-root `.env` **only if that file exists** (via [`scripts/run-upload.js`](scripts/run-upload.js)); CI has no `.env` and uses the workflow `env` block. For values not set in the file, the shell environment still applies unless you add them to each profile file.

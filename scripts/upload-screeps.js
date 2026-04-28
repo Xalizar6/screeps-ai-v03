@@ -12,6 +12,10 @@ const SCREEPS_PASSWORD = (process.env.SCREEPS_PASSWORD || "").trim();
 const BUILD_OUTPUT_PATH = "dist/main.js";
 
 /**
+ * Builds the API origin URL. `SCREEPS_HOST` may include a path prefix (no leading
+ * slash), e.g. `screeps.com/ptr` for the official Public Test Realm so requests
+ * hit `/ptr/api/...` instead of `/api/...`.
+ *
  * Official `screeps.com` uses https on 443 (defaults). Many community servers
  * use http on port 80 (omit SCREEPS_PORT) or http on 21025 (set SCREEPS_PORT).
  */

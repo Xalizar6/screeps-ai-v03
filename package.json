@@ -13,7 +13,9 @@
     "fix": "npm run lint:fix && npm run format",
     "build": "npm run lint && npm run format:check && npm run typecheck && node ./scripts/build.js",
     "upload": "node ./scripts/run-upload.js",
-    "deploy": "npm run build && npm run upload"
+    "upload:ptr": "node ./scripts/run-upload.js .env.ptr",
+    "deploy": "npm run build && npm run upload",
+    "deploy:ptr": "npm run build && npm run upload:ptr"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
