@@ -29,6 +29,10 @@ This folder is the **shared reference library** and the **source of truth** for 
 - `external-example-codebases.md`
   - When you want **optional pointers** to other open-source Screeps AIs (bonzAI, Overmind, Nooby Guide) for patterns and vocabulary — not mirrored here; adapt to this repo’s standards.
 
+## Long-running roadmaps (tracked in repo)
+
+- [`../roadmaps/room-layout-automation.md`](../roadmaps/room-layout-automation.md) — phased plan for automated room layout (roads, extensions, towers, distance transform, min-cut); checkboxes for progress across sessions.
+
 ## How we use references in this repo
 
 - Prefer **IDs in memory** + `Game.getObjectById(...)` over repeated searches in hot loops.
