@@ -201,6 +201,50 @@ Memory.rooms["W1N1"].layoutApproved = true; // constructor starts placing sites
 - `src/management/construction/layoutConstructor.ts` (new)
 - [`src/management/roomManager.ts`](../../src/management/roomManager.ts) — orchestration calls
 
+### Human checkpoint
+
+Phase 1 ships the framework without real PathFinder-driven layout yet (Phase 2 adds roads). Validate end-to-end behavior **before** Phase 2 by injecting a dummy plan from the Screeps console, then exercising visualize / approve / construct:
+
+```javascript
+// Replace W1N1 with your room name
+Memory.rooms["W1N1"].layoutPlan = {
+  generatedAtTick: Game.time,
+  roads: [
+    {
+      label: "test-road",
+      path: [
+        [25, 25],
+        [26, 25],
+        [27, 25],
+        [28, 25],
+        [29, 25],
+      ],
+      rcl: 0,
+    },
+  ],
+  structures: [{ type: STRUCTURE_EXTENSION, pos: [24, 24], rcl: 2 }],
+};
+Memory.rooms["W1N1"].layoutVisualize = true;
+```
+
+Verify:
+
+1. With visualization on, roads and structure markers render as intended.
+2. `layoutVisualizeRcl` filtering behaves as specified (e.g. show/hide RCL-tagged structures vs roads depending on layer).
+3. `delete Memory.rooms["W1N1"].layoutPlan` clears the overlay on the next relevant tick (generator may recreate — behavior depends on trigger logic).
+4. `Memory.rooms["W1N1"].layoutApproved = true` lets the constructor place construction sites for eligible plan items (respect terrain / occupancy checks).
+5. RCL gating: planned structures above current controller level must **not** get sites until RCL catches up (e.g. extension at `rcl: 2` in an RCL 1 room).
+6. Cadence + bucket: constructor runs only on `CONSTRUCTION_PLAN_INTERVAL`, not every tick, and defers when bucket is below `MIN_BUCKET_FOR_CONSTRUCTION_PLAN`.
+
+### External dependencies
+
+Phase 1 does **not** require copying community algorithms or visualization helpers into the repo:
+
+- **[Screeps-Tutorials/basePlanningAlgorithms](https://github.com/Screeps-Tutorials/Screeps-Tutorials/tree/Master/basePlanningAlgorithms)** — `distanceTransform`, `floodFill`, and `mincut` solve open-space scoring, seed proximity (BFS), and chokepoint cuts. None apply to Phase 1 infrastructure; the roadmap maps them to later phases (`floodFill` → Phase 5 extensions, `distanceTransform` → Phase 7 anchors, `mincut` → Phase 8 ramparts).
+- **[screepers/RoomVisual](https://github.com/screepers/RoomVisual)** — native `RoomVisual` (`circle`, `poly`, `rect`, `text`) is enough for overlays here. Consider borrowing `.structure()`-style rendering later (e.g. Phase 5+) when many structure types need recognizable glyphs.
+
+**Container placement vs algorithms:** [`src/management/roomConstruction.ts`](../../src/management/roomConstruction.ts) already uses path-aware choices (`PathFinder` along controller ↔ source routes). Replacing that with flood fill or distance transform would not improve correctness or CPU for containers; flood fill ignores terrain costs, and distance transform optimizes “open space,” not “on the haul path.” Phase 3 can align containers with planned roads without swapping algorithms.
+
 ---
 
 ## Phase 2 — Road Planning (First Consumer of the Framework)
