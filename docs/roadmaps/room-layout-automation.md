@@ -7,7 +7,8 @@
 ## Progress
 
 - [x] **Phase 0** — Read and orient (no code)
-- [ ] **Phase 1** — Static roads (spawn ↔ source, spawn ↔ controller)
+- [ ] **Phase 1a** — Road path visuals only (RoomVisual lines each tick, no construction sites)
+- [ ] **Phase 1b** — Place construction sites (swap visuals for real `createConstructionSite` calls)
 - [ ] **Phase 2** — Travel heatmap (road refinement)
 - [ ] **Phase 3** — Extension placement (flood-fill + RCL-gated)
 - [ ] **Phase 4** — Tower placement (RCL 3+)
@@ -81,37 +82,78 @@ flowchart LR
 
 ## Phase 1 — Static Road Placement Along Key Paths
 
-**Goal**: place road construction sites along the computed paths spawn→source and spawn→controller.
+**Goal**: place road construction sites along two kinds of paths:
+
+1. **Spawn → each source** — the primary shuttle/builder highway.
+2. **Controller → each source** — the upgrader supply route.
+
+A direct spawn→controller road is intentionally excluded: upgraders get energy from source containers (or the controller buffer container), so the useful traffic flows through sources, not directly between spawn and controller.
 
 **Why first**: roads are available at any RCL, builders already know how to build `FIND_MY_CONSTRUCTION_SITES`, and the repair role already handles `STRUCTURE_ROAD`. This is a complete, immediately-useful win with zero new memory schema.
+
+**Controller-side road terminus**: the road toward the controller stops at `range: 3` (the upgrader working zone / controller buffer container area), **not** at the controller itself. No creep walks onto the controller tile — upgraders call `upgradeController` from up to 3 tiles away, and shuttles deliver to the buffer container which is placed ~3 steps from the controller (see `CONTROLLER_BUFFER_CONTAINER_RANGE` in `roomConstruction.ts`). Later, this can be refined to target the buffer container position directly via `room.memory.controllerContainerId` if more precision is needed.
 
 **Core concept — PathFinder for road layout:**
 
 ```typescript
-const result = PathFinder.search(
-  spawn.pos,
-  { pos: source.pos, range: 1 },
-  {
-    plainCost: 2,
-    swampCost: 10,
-    roomCallback(roomName) {
-      const cm = new PathFinder.CostMatrix();
-      // existing roads get cost 1 (preferred) — this makes roads reinforce themselves
-      room.find(FIND_STRUCTURES).forEach((s) => {
-        if (s.structureType === STRUCTURE_ROAD) cm.set(s.pos.x, s.pos.y, 1);
-      });
-      return cm;
-    },
+// spawn → source (range 1 = adjacent to the source)
+PathFinder.search(spawn.pos, { pos: source.pos, range: 1 }, opts);
+
+// source → controller (range 3 = upgrader work zone, stops at buffer container area)
+PathFinder.search(source.pos, { pos: controller.pos, range: 3 }, opts);
+
+// shared opts for both:
+const opts = {
+  plainCost: 2,
+  swampCost: 10,
+  roomCallback(roomName) {
+    const cm = new PathFinder.CostMatrix();
+    // existing roads get cost 1 (preferred) — makes paths reinforce/merge
+    room.find(FIND_STRUCTURES).forEach((s) => {
+      if (s.structureType === STRUCTURE_ROAD) cm.set(s.pos.x, s.pos.y, 1);
+    });
+    return cm;
   },
-);
+};
+
+// then for each result:
 result.path.forEach((pos) => pos.createConstructionSite(STRUCTURE_ROAD));
 ```
+
+**Road overlap is fine**: if the spawn→source and source→controller paths share tiles, `createConstructionSite` on an existing site/road is a harmless no-op. The `roomCallback` cost of 1 on existing roads actively encourages path merging, which means shared road segments emerge naturally where routes overlap.
 
 **What you will learn**: `PathFinder.CostMatrix`, the `roomCallback` pattern, why `plainCost: 2` makes roads cost-effective (roads cost 1, so the pathfinder will prefer existing roads and the newly built path will self-reinforce over time).
 
 **Files touched**: [`src/management/roomConstruction.ts`](../../src/management/roomConstruction.ts) only.
 
-**Human checkpoint**: review the visual in the Screeps client (use `RoomVisual` to draw the planned path before placing sites).
+### Phase 1a — Road Path Visuals Only
+
+Compute the PathFinder paths (spawn→source, source→controller) and draw them with `RoomVisual` every tick. No construction sites are placed — this is a preview-only step so you can verify the planned routes look correct in the Screeps client.
+
+```typescript
+// draw each planned road tile as a small circle
+for (const pos of result.path) {
+  room.visual.circle(pos.x, pos.y, { radius: 0.25, fill: "#ffaa00", opacity: 0.6 });
+}
+// optionally connect them with a poly line
+room.visual.poly(result.path, { stroke: "#ffaa00", lineStyle: "dotted", opacity: 0.4 });
+```
+
+`RoomVisual` has zero game-state side effects — it renders an overlay visible only in the client and costs negligible CPU. This runs every tick (not gated by `CONSTRUCTION_PLAN_INTERVAL`) so you can watch the paths in real time as creeps move around.
+
+**Human checkpoint**: open the Screeps client and verify:
+- Paths look reasonable (no weird zigzags through walls)
+- Spawn→source paths cover the shuttle highway
+- Source→controller paths end in the upgrader work zone (~3 tiles from controller), not at the controller itself
+- Overlapping segments are visible where paths merge
+
+### Phase 1b — Place Construction Sites
+
+Once the visuals look correct, swap `RoomVisual` drawing for actual `createConstructionSite(STRUCTURE_ROAD)` calls. This step runs on the existing `CONSTRUCTION_PLAN_INTERVAL` cadence (not every tick). Optionally keep the visuals alongside for one deploy so you can see both the plan and the actual sites appearing.
+
+**Place all sites at once** (not one at a time). A partially-built road path still has fatigue gaps at unbuilt tiles, so finishing the whole path fast matters more than finishing one tile perfectly. The spawn manager already scales builders reactively via `desiredBuilders = Math.ceil(myConstructionSiteCount / 3)`, so placing all sites in one pass naturally spawns the right number of builders with no extra code. The only limit to watch is the **100 construction site cap** per player across all rooms — road paths are typically 15–25 tiles each, well within budget for a single room. Multi-room site budgeting is a future concern.
+
+**Human checkpoint**: confirm in the client that builders pick up the road sites and start constructing them.
 
 ---
 
