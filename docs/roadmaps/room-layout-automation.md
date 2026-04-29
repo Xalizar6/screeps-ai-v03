@@ -6,7 +6,7 @@
 
 ## Progress
 
-- [ ] **Phase 0** — Read and orient (no code)
+- [x] **Phase 0** — Read and orient (no code)
 - [ ] **Phase 1** — Static roads (spawn ↔ source, spawn ↔ controller)
 - [ ] **Phase 2** — Travel heatmap (road refinement)
 - [ ] **Phase 3** — Extension placement (flood-fill + RCL-gated)
@@ -154,7 +154,8 @@ saveHeatmapToMemory(room, cm);
 **Core concept — count existing + allowed, fill the gap:**
 
 ```typescript
-const allowed = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][room.controller.level];
+const allowed =
+  CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][room.controller.level];
 const existing = room.find(FIND_MY_STRUCTURES, {
   filter: { structureType: STRUCTURE_EXTENSION },
 }).length;
@@ -277,3 +278,62 @@ Phase 3 only requires Phase 1 as prerequisite (you need roads to reach extension
   - `distanceTransform.js` — two variants (Chebyshev + Manhattan), visualizable, Phase 5
   - `floodFill.js` — BFS from seeds returning proximity CostMatrix, Phase 3
   - `mincut.ts` — full TypeScript Edmonds-Karp min-cut, Phase 6
+
+---
+
+## Delegation / Handoff to Another Agent Session
+
+Use this section when handing a phase to a fresh agent (new chat, background task, etc.) so it has full context without replaying this conversation.
+
+### Prompt template
+
+Copy, fill in the bracketed fields, and paste as the opening message in a new session:
+
+```text
+Implement Phase [N] of @docs/roadmaps/room-layout-automation.md only.
+
+Repo: screeps-ai-v03
+
+Scope:
+- [One sentence describing the phase goal — e.g. "Place road construction
+  sites along PathFinder paths from each spawn to each source and to the
+  room controller, inside runRoomConstruction."]
+- Follow existing CONSTRUCTION_PLAN_INTERVAL and MIN_BUCKET_FOR_CONSTRUCTION_PLAN
+  in src/management/roomConstruction.ts; do not duplicate that orchestration.
+- Obey @src/management/AGENTS.md, root @AGENTS.md, and
+  @docs/agent-references/screeps-api.md for PathFinder / createConstructionSite
+  conventions.
+
+Out of scope:
+- No Phase [N+1] features ([name the next phase]).
+- No drive-by refactors outside what Phase [N] touches.
+
+Skills to follow:
+- /checking-screeps-api (validate intent timing, return codes)
+- /screeps-management-change (management module boundaries)
+- /screeps-learning-loop (teach-as-you-go, human checkpoints)
+
+Verify: npm run fix then npm run build (PowerShell: run separately).
+
+When done: mark Phase [N] complete ([x]) in the Progress section of
+docs/roadmaps/room-layout-automation.md.
+```
+
+### Files to @mention / attach
+
+| Purpose                 | Paths                                      |
+| ----------------------- | ------------------------------------------ |
+| Spec (always)           | `@docs/roadmaps/room-layout-automation.md` |
+| Implementation target   | `@src/management/roomConstruction.ts`      |
+| Orchestrator            | `@src/management/roomManager.ts`           |
+| Conventions             | `@src/management/AGENTS.md`, `@AGENTS.md`  |
+| API safety              | `@docs/agent-references/screeps-api.md`    |
+| Memory types (Phase 2+) | `@src/types.d.ts`                          |
+
+### Why this works
+
+- The roadmap doc is the single source of truth — goals, code sketches, checkpoints, and references are all inline.
+- The prompt template sets boundaries (scope and out-of-scope) so the agent does not drift into later phases.
+- Skills enforce intent-timing checks and human review points automatically.
+- Verification (`npm run fix` + `npm run build`) catches lint and type errors before you review.
+- The checkbox update in the Progress section keeps the roadmap current for the next session.
