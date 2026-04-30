@@ -7,7 +7,7 @@
 ## Progress
 
 - [x] **Phase 0** — Read and orient (no code)
-- [ ] **Phase 1** — Layout plan infrastructure (Plan / Store / Visualize / Iterate / Approve / Construct)
+- [x] **Phase 1** — Layout plan infrastructure (Plan / Store / Visualize / Iterate / Approve / Construct)
 - [ ] **Phase 2** — Road planning (first consumer of the framework, sequential path accumulation)
 - [ ] **Phase 3** — Container placement (source containers + controller buffer container, migrated into framework)
 - [ ] **Phase 4** — Travel heatmap (road refinement from actual creep movement)

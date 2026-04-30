@@ -56,6 +56,32 @@ interface Memory {
   log?: LogConfigMemory;
 }
 
+/** One planned road polyline; coordinates are room-local [x, y] tiles (serializable). */
+interface RoadSegmentPlan {
+  /** Human-readable id, e.g. `spawn→source-5bbcaf`. */
+  label: string;
+  /** Tile path `[[x,y], …]` — compact in serialized Memory. */
+  path: [number, number][];
+  /** Minimum RCL at which this segment may be built (`0` = always allowed once approved). */
+  rcl: number;
+}
+
+/** Planned structure position for layout approval and staged construction. */
+interface StructurePlacementPlan {
+  type: BuildableStructureConstant;
+  pos: [number, number];
+  /** RCL at which this structure becomes placeable (matches game unlock progression tagging). */
+  rcl: number;
+}
+
+/** Serialized room layout produced by `planGenerator` and consumed by visualizer + constructor. */
+interface RoomLayoutPlan {
+  /** `Game.time` when this plan was last (re)generated; useful for console inspection and staleness detection. */
+  generatedAtTick: number;
+  roads: RoadSegmentPlan[];
+  structures: StructurePlacementPlan[];
+}
+
 interface RoomMemory {
   lastManagedTick?: number;
   /** Count of `my` construction sites in this room; refreshed each tick in `roomManager` from `Game.constructionSites`. */
@@ -64,4 +90,12 @@ interface RoomMemory {
   sources?: Record<Id<Source>, SourceMemory>;
   /** Controller buffer container within scan/plan radius of the controller; see `roomCache` / `roomConstruction`. */
   controllerContainerId?: Id<StructureContainer>;
+  /** Layout automation: planned roads and structures; see `src/management/construction/planGenerator.ts`. */
+  layoutPlan?: RoomLayoutPlan;
+  /** When true, `layoutVisualizer` draws `layoutPlan` each tick (no CPU-heavy planning). */
+  layoutVisualize?: boolean;
+  /** `0` or unset = all RCL layers; `N` = show items at or below RCL N (cumulative). */
+  layoutVisualizeRcl?: number;
+  /** When true, `layoutConstructor` may place sites from `layoutPlan` on the construction interval. */
+  layoutApproved?: boolean;
 }

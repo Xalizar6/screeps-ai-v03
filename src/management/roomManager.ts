@@ -1,6 +1,18 @@
 import { createLogger } from "../logging/logger";
 import { LogLevel } from "../logging/levels";
 import {
+  LOG_MODULE as layoutConstructorModule,
+  runLayoutConstructor,
+} from "./construction/layoutConstructor";
+import {
+  LOG_MODULE as planGeneratorModule,
+  runLayoutPlanGenerator,
+} from "./construction/planGenerator";
+import {
+  LOG_MODULE as layoutVisualizerModule,
+  runLayoutVisualizer,
+} from "./construction/layoutVisualizer";
+import {
   CONSTRUCTION_PLAN_INTERVAL,
   runRoomConstruction,
 } from "./roomConstruction";
@@ -17,6 +29,15 @@ const roomCacheLogger = createLogger(roomCacheModule, {
   defaultLevel: LogLevel.Information,
 });
 const structureCacheLogger = createLogger(structureCacheModule, {
+  defaultLevel: LogLevel.Information,
+});
+const planGeneratorLogger = createLogger(planGeneratorModule, {
+  defaultLevel: LogLevel.Information,
+});
+const layoutVisualizerLogger = createLogger(layoutVisualizerModule, {
+  defaultLevel: LogLevel.Information,
+});
+const layoutConstructorLogger = createLogger(layoutConstructorModule, {
   defaultLevel: LogLevel.Information,
 });
 
@@ -36,8 +57,17 @@ export const runRoomManagement = (): void => {
     structureCacheLogger.moduleScope("runStructureCache", () => {
       runStructureCache(room);
     });
+    planGeneratorLogger.moduleScope("runLayoutPlanGenerator", () => {
+      runLayoutPlanGenerator(room);
+    });
+    layoutVisualizerLogger.moduleScope("runLayoutVisualizer", () => {
+      runLayoutVisualizer(room);
+    });
     if (runConstructionPlan) {
       runRoomConstruction(room);
+      layoutConstructorLogger.moduleScope("runLayoutConstructor", () => {
+        runLayoutConstructor(room);
+      });
     }
   }
 };
