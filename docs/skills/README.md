@@ -93,6 +93,14 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/codebase-onboarding/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/codebase-onboarding/SKILL.md`](../.agents/skills/codebase-onboarding/SKILL.md)
 
+### `zoom-out`
+
+- **Slash:** `/zoom-out`
+- **Purpose:** Mid-session abstraction lift: concise map of relevant modules / callers using this repo's Screeps vocabulary; lighter than `parallel-exploring` or `codebase-onboarding`.
+- **Typical prompt language:** zoom out, bigger picture, how does this fit, map the callers.
+- **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/zoom-out/references/ATTRIBUTION.md)
+- **Source:** [`.agents/skills/zoom-out/SKILL.md`](../.agents/skills/zoom-out/SKILL.md)
+
 ### `building-skills-from-patterns`
 
 - **Slash:** `/building-skills-from-patterns`
@@ -106,6 +114,14 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 - **Purpose:** Structured code review checklist (includes a short Screeps lens in the skill body).
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/reviewing-code/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/reviewing-code/SKILL.md`](../.agents/skills/reviewing-code/SKILL.md)
+
+### `writing-commit-messages`
+
+- **Slash:** `/writing-commit-messages`
+- **Purpose:** Conventional commit format: types, optional scope, imperative subject, body for rationale, footers for breaking changes and issue links.
+- **Typical prompt language:** commit message, conventional commit, squash message, PR title, changelog entry.
+- **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/writing-commit-messages/references/ATTRIBUTION.md)
+- **Source:** [`.agents/skills/writing-commit-messages/SKILL.md`](../.agents/skills/writing-commit-messages/SKILL.md)
 
 ### `systematic-debugging`
 
@@ -124,7 +140,7 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 ### `grill-me`
 
 - **Slash:** `/grill-me`
-- **Purpose:** Stress-test a plan or design with sequential probing questions.
+- **Purpose:** Stress-test a plan or design with sequential probing questions; align terminology with `AGENTS.md` / `docs/agent-references/`, verify claims against code, and suggest `architecture-decision-records` when a grilling outcome should be captured as an ADR.
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/grill-me/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/grill-me/SKILL.md`](../.agents/skills/grill-me/SKILL.md)
 
