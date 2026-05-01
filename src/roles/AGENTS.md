@@ -7,6 +7,18 @@ These instructions apply when working in `src/roles/`.
 - Each file should implement **one creep role** (for example `harvester`, `builder`).
 - Role code should focus on **per-creep decisions** (what to do this tick), not room-level orchestration.
 
+## Current files
+
+| File                   | Responsibility                                                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `fsm.ts`               | Shared FSM helpers: `transitionState`, `runFsm`, `isStoreEmpty`, `isStoreFull`, `getObjectByIdOrNull`, `resolveSource` |
+| `energyAcquisition.ts` | Shared `acquireEnergy` helper: container withdraw → dropped pickup → harvest fallback                                  |
+| `harvester.ts`         | Mines sources; deposits to spawn/extensions (or sits at container when shuttles present)                               |
+| `upgrader.ts`          | Fills energy from controller container; upgrades controller                                                            |
+| `shuttle.ts`           | Energy courier: picks up from containers/dropped, delivers to structures                                               |
+| `builder.ts`           | Acquires energy; builds construction sites                                                                             |
+| `repairer.ts`          | Acquires energy; repairs damaged structures per `repairConfig` thresholds                                              |
+
 ## Recommended structure
 
 - Export a single, obvious entrypoint per role (for example `run(creep: Creep)`), so `src/index.ts` (or a manager) can call it without special-casing.
@@ -22,6 +34,38 @@ These instructions apply when working in `src/roles/`.
 - When adding FSM fields, extend `CreepMemory` in `src/types.d.ts` and document which states each role uses.
 - Do not gate FSM transitions on `creep.store` immediately after `transfer` / `withdraw` / `pickup` — intents resolve at end-of-tick; prefer store checks at the **top** of the handler (see **Intent timing** in `docs/agent-references/screeps-api.md`).
 - Do not issue **two dependent actions from the same official pipeline** in one tick unless you intend the **rightmost** to win; see **Action priority matrix** in `docs/agent-references/screeps-api.md` and [Simultaneous actions](https://docs.screeps.com/simultaneous-actions.html). Verify behavior next tick if return codes look `OK` but the creep did not act as expected.
+
+### `targetId` lifecycle pattern
+
+The standard pattern for any cached object reference in a role handler:
+
+```ts
+function resolveTarget(creep: Creep): StructureSpawn | null {
+  // 1. Try cached ID
+  const raw = creep.memory.targetId
+    ? Game.getObjectById(creep.memory.targetId)
+    : null;
+  if (
+    raw instanceof StructureSpawn &&
+    raw.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+  ) {
+    return raw; // cache hit — reuse without a find
+  }
+  // 2. Clear stale cache (wrong type, destroyed, or no longer valid)
+  if (raw) delete creep.memory.targetId;
+
+  // 3. Acquire a new target
+  const target = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+  if (target) creep.memory.targetId = target.id;
+  return target;
+}
+```
+
+Key rules:
+
+- Use `instanceof` to verify the resolved object is the expected type — wrong types clear the cache.
+- Always delete the cached ID when the target is gone or no longer valid, so re-acquisition happens next tick.
+- Prefer `findClosestByPath` or a pre-cached room-level list over `room.find` every tick.
 
 ## TypeScript expectations
 

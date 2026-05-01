@@ -21,12 +21,86 @@ Full **skill catalog**, **slash commands**, trigger phrases, and a short **pract
 
 ## Architecture (creep roles)
 
-- **Main loop** (`src/index.ts`): room/spawn management, then per-role passes over `Game.creeps`.
-- **Roles** (`src/roles/*.ts`): each creep role is a small **finite state machine** stored in `Memory.creeps[name]` (`state`, optional `targetId`, `stateSinceTick`). Transition rules and dispatch stay **inside the role file** for cohesion. The **upgrader** role only fills energy and upgrades the room controller (RCL).
-- **FSM helpers** (`src/roles/fsm.ts`): shared pure functions only (`isStoreEmpty`, `isStoreFull`, `transitionState`, `getObjectByIdOrNull`). No `Creep.prototype` extensions for trivial checks.
-- **Types** (`src/types.d.ts`): extend `CreepMemory` when adding states or persisted ids.
+### Tick pipeline
+
+Each tick runs in this order:
+
+```mermaid
+flowchart TD
+    A["loop() — src/index.ts"] --> B["dead-creep GC\ncreepMemoryGc.ts"]
+    B --> C["runRoomManagement()\nroomManager.ts"]
+    C --> C1["roomCache + structureCache\n(tick-scoped finds)"]
+    C1 --> C2["planGenerator + layoutVisualizer\n(layout plan update)"]
+    C2 --> C3["roomConstruction + layoutConstructor\nevery 100 ticks"]
+    C --> D["buildCreepSnapshot()\ncreepSnapshot.ts"]
+    D --> E["runSpawnManagement(snapshot)\nspawnManager.ts"]
+    E --> F["Role passes\n(per creep in snapshot)"]
+    F --> F1["harvester · upgrader · shuttle\nbuilder · repairer"]
+```
+
+- **Roles** (`src/roles/*.ts`): each creep role is a small **finite state machine** stored in `Memory.creeps[name]` (`state`, optional `targetId`, `stateSinceTick`). Transition rules and dispatch stay **inside the role file** for cohesion.
+- **FSM helpers** (`src/roles/fsm.ts`): shared pure functions only (`isStoreEmpty`, `isStoreFull`, `transitionState`, `getObjectByIdOrNull`, `resolveSource`). No `Creep.prototype` extensions for trivial checks.
+- **Energy acquisition** (`src/roles/energyAcquisition.ts`): shared `acquireEnergy` helper used by non-harvester roles — withdraws from source containers, picks up dropped energy, or harvests as fallback.
+- **Types** (`src/types.d.ts`): extend `CreepMemory` / `RoomMemory` when adding states, persisted IDs, or room-level layout fields.
+
+### Repo layout
+
+```
+src/
+├── index.ts                    ← tick entry (loop export)
+├── types.d.ts                  ← Memory interfaces
+├── roles/                      ← one file per creep role
+│   ├── fsm.ts                  ← shared FSM helpers
+│   ├── energyAcquisition.ts    ← shared energy pickup logic
+│   ├── harvester.ts            ← mines sources, deposits to spawn/extensions
+│   ├── upgrader.ts             ← fills energy, upgrades controller
+│   ├── shuttle.ts              ← energy courier (container → structures)
+│   ├── builder.ts              ← builds construction sites
+│   └── repairer.ts             ← repairs damaged structures
+├── management/                 ← room / spawn coordination
+│   ├── roomManager.ts          ← per-room orchestrator (calls sub-managers)
+│   ├── spawnManager.ts         ← census-based spawn queue
+│   ├── roomCache.ts            ← tick-scoped room.find cache
+│   ├── structureCache.ts       ← tick-scoped structure cache
+│   ├── roomConstruction.ts     ← legacy construction-site placement
+│   ├── shuttleDemand.ts        ← shuttle population target calculation
+│   ├── creepSnapshot.ts        ← pre-built creep-by-role/room index
+│   ├── creepMemoryGc.ts        ← cleans Memory.creeps for dead creeps
+│   ├── tickSignals.ts          ← cross-module tick-level derived signals
+│   ├── repairConfig.ts         ← repair thresholds and priority rules
+│   └── construction/           ← layout automation pipeline
+│       ├── planGenerator.ts    ← generates RoomLayoutPlan in RoomMemory
+│       ├── layoutConstructor.ts← places construction sites from plan
+│       └── layoutVisualizer.ts ← renders plan overlays in-game
+└── logging/                    ← logger + level plumbing
+    ├── logger.ts               ← createLogger, Logger API
+    ├── levels.ts               ← LogLevel enum, parseLogLevel
+    └── resolveLevel.ts         ← getEffectiveLevel (Memory.log resolution)
+dist/
+└── main.js                     ← bundled output (git-ignored)
+docs/
+├── agent-references/           ← Screeps API + gameplay refs for agents
+├── skills/                     ← skill catalog + pilot log
+└── roadmaps/                   ← long-running implementation roadmaps
+```
 
 To add or evolve a role, use the project skill at `.agents/skills/adding-a-creep-role/SKILL.md` for the full cross-file checklist.
+
+## Current capabilities
+
+What the bot does today (update this section as features ship):
+
+| Capability                         | Status | Notes                                                                                    |
+| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Harvest energy from sources        | ✓      | Harvester parks at source container when shuttles present; falls back to direct delivery |
+| Shuttle energy to spawn/extensions | ✓      | Demand-based population; withdraws from source containers, picks up dropped energy       |
+| Upgrade room controller            | ✓      | Upgrader withdraws from controller-adjacent container                                    |
+| Build construction sites           | ✓      | Builder count scales with site backlog (`ceil(sites/3)`)                                 |
+| Repair damaged structures          | ✓      | Repairer count scales with repair backlog; priority-ordered by structure type            |
+| Autonomous construction placement  | ✓      | Layout plan generated from RCL; sites placed every 100 ticks                             |
+| Layout visualization               | ✓      | Plan overlays rendered in-game for review/approval                                       |
+| Multi-room expansion               | ✗      | Planned — see `docs/roadmaps/room-layout-automation.md`                                  |
+| Defense / towers                   | ✗      | Not yet implemented                                                                      |
 
 ## Logging
 

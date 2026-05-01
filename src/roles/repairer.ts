@@ -24,6 +24,7 @@ const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 type RepairerState = "harvest" | "repair";
 
+/** Ensures the creep has a valid repairer state, defaulting to "harvest" on first run or stale state. */
 function ensureState(creep: Creep): RepairerState {
   if (creep.memory.state !== "harvest" && creep.memory.state !== "repair") {
     creep.memory.state = "harvest";
@@ -49,6 +50,10 @@ function hasRepairWork(creep: Creep): boolean {
   return countRepairBacklog(creep.room) > 0;
 }
 
+/**
+ * Returns the cached repair target if still valid (<95% hits), or selects a new one from structures
+ * below 50% hits, ordered by priority type then proximity.
+ */
 function resolveRepairTarget(creep: Creep): Structure | null {
   if (creep.memory.repairTargetId) {
     const raw = Game.getObjectById(creep.memory.repairTargetId);
@@ -95,6 +100,7 @@ function resolveRepairTarget(creep: Creep): Structure | null {
   return best;
 }
 
+/** Harvest state: acquire energy via shared helper; transitions to "repair" when store is full. */
 function runHarvest(creep: Creep): void {
   if (isStoreFull(creep)) {
     transitionState(creep, "repair");
@@ -103,6 +109,7 @@ function runHarvest(creep: Creep): void {
   acquireEnergy(creep);
 }
 
+/** Repair state: move to and repair the priority target structure; transitions to "harvest" when energy runs low. */
 function runRepair(creep: Creep): void {
   if (
     isEnergyBelowWorkTopUpThreshold(creep) &&

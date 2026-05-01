@@ -140,7 +140,7 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 1. Start a **new Agent** chat for one focused task.
 2. Describe the task in natural language; add **trigger phrases** from the catalog if you want stronger auto-invocation.
 3. For role wiring or API-sensitive behavior, **manually invoke** `/adding-a-creep-role` and/or `/checking-screeps-api` before or at the start of the task. For management-only work use `/screeps-management-change`; for deploy/build use `/building-and-deploying-screeps`.
-4. Run `npm run fix` then `npm run build` (see [`AGENTS.md`](../AGENTS.md) for PowerShell chaining), or follow `/building-and-deploying-screeps`.
+4. Run `npm run fix` then `npm run build` (see [`AGENTS.md`](../../AGENTS.md) for PowerShell chaining), or follow `/building-and-deploying-screeps`.
 5. Optionally append a **Pilot Log** entry below with auto-invoked yes/no and what worked.
 
 ## When New Skills Are Added

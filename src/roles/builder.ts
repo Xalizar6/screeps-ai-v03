@@ -18,6 +18,7 @@ const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
 type BuilderState = "harvest" | "build";
 
+/** Ensures the creep has a valid builder state, defaulting to "harvest" on first run or stale state. */
 function ensureState(creep: Creep): BuilderState {
   if (creep.memory.state !== "harvest" && creep.memory.state !== "build") {
     creep.memory.state = "harvest";
@@ -26,6 +27,7 @@ function ensureState(creep: Creep): BuilderState {
   return creep.memory.state === "build" ? "build" : "harvest";
 }
 
+/** Returns the cached construction site from memory, or finds and caches the closest one by path. */
 function resolveSite(creep: Creep): ConstructionSite | null {
   const raw = creep.memory.targetId
     ? Game.getObjectById(creep.memory.targetId)
@@ -43,6 +45,7 @@ function resolveSite(creep: Creep): ConstructionSite | null {
   return site;
 }
 
+/** Harvest state: acquire energy via shared helper; transitions to "build" when store is full. */
 function runHarvest(creep: Creep): void {
   if (isStoreFull(creep)) {
     transitionState(creep, "build");
@@ -51,6 +54,7 @@ function runHarvest(creep: Creep): void {
   acquireEnergy(creep);
 }
 
+/** Build state: move to and build the nearest construction site; transitions to "harvest" when energy runs low. */
 function runBuild(creep: Creep): void {
   if (
     isEnergyBelowWorkTopUpThreshold(creep) &&

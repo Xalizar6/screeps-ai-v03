@@ -161,6 +161,69 @@ Guideline:
 - Use default `moveTo` until you have a CPU/pathing reason to go lower-level.
 - If you introduce custom pathing, keep it centralized (management/util) and cache where possible.
 
+## Body parts
+
+Each body part costs energy and provides a capability. Parts are defined by `BODYPART_COST`.
+
+| Part            | Cost | Effect                                                                                                |
+| --------------- | ---- | ----------------------------------------------------------------------------------------------------- |
+| `WORK`          | 100  | Harvest 2 energy/tick from source; build 5 progress/tick; repair 100 hits/tick; upgrade 1 energy/tick |
+| `CARRY`         | 50   | Store 50 energy (or other resource) per part                                                          |
+| `MOVE`          | 50   | Reduces fatigue by 2/tick; 1 MOVE per non-MOVE part on plains, 1 MOVE per 5 parts on roads            |
+| `ATTACK`        | 80   | Melee attack (30 damage/tick)                                                                         |
+| `RANGED_ATTACK` | 150  | Ranged attack (10 damage/tick, mass 1-3)                                                              |
+| `HEAL`          | 250  | Heal self or adjacent (12 hits/tick, ranged 4 hits/tick)                                              |
+| `TOUGH`         | 10   | No effect beyond HP; used for cheap HP buffer                                                         |
+| `CLAIM`         | 600  | Reserve or claim a controller                                                                         |
+
+**Fatigue:** every non-MOVE part generates 1 fatigue on plains (5 on swamps) when moving. MOVE reduces fatigue by 2/tick. A creep with fatigue > 0 cannot move that tick (`ERR_TIRED`). Roads halve fatigue generation for non-MOVE parts.
+
+**Part limits:** a creep body can have at most **50 parts total**. Spawn cost must be ≤ the spawn's available energy.
+
+## Spawning: `StructureSpawn.spawnCreep`
+
+```ts
+const result = spawn.spawnCreep(body, name, opts);
+// body: BodyPartConstant[]  — part order matters (first parts die last)
+// name: string              — must be unique across Game.creeps
+// opts.memory               — initial CreepMemory; assigned before the first tick
+// opts.directions           — optional exit directions for the creep
+```
+
+Common return codes:
+
+| Code                    | Meaning                               |
+| ----------------------- | ------------------------------------- |
+| `OK`                    | Spawning queued                       |
+| `ERR_NOT_ENOUGH_ENERGY` | Room energy < body cost               |
+| `ERR_NAME_EXISTS`       | A creep with that name already exists |
+| `ERR_BUSY`              | Spawn is already spawning             |
+| `ERR_INVALID_ARGS`      | Body is empty or has > 50 parts       |
+
+**Same-tick check:** `spawn.spawning` is non-null while a creep is being spawned; skip that spawn for this tick.
+
+**Spawning ticks:** a creep takes `3 × body.length` ticks to spawn.
+
+## RCL structure limits
+
+| Structure      | RCL 1       | RCL 2 | RCL 3 | RCL 4 | RCL 5 | RCL 6 | RCL 7 | RCL 8 |
+| -------------- | ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| Spawn          | 1           | 1     | 1     | 1     | 1     | 1     | 2     | 3     |
+| Extension      | 0           | 5     | 10    | 20    | 30    | 40    | 50    | 60    |
+| Tower          | 0           | 0     | 1     | 1     | 2     | 2     | 3     | 6     |
+| Container      | 5 (any RCL) |       |       |       |       |       |       |       |
+| Road           | unlimited   |       |       |       |       |       |       |       |
+| Wall / Rampart | 0           | 2 500 | 2 500 | 2 500 | 2 500 | 2 500 | 2 500 | 2 500 |
+| Storage        | 0           | 0     | 0     | 1     | 1     | 1     | 1     | 1     |
+| Link           | 0           | 0     | 0     | 0     | 2     | 3     | 4     | 6     |
+| Lab            | 0           | 0     | 0     | 0     | 0     | 3     | 6     | 10    |
+| Terminal       | 0           | 0     | 0     | 0     | 0     | 1     | 1     | 1     |
+| Factory        | 0           | 0     | 0     | 0     | 0     | 0     | 0     | 1     |
+| Observer       | 0           | 0     | 0     | 0     | 0     | 0     | 0     | 1     |
+| Nuker          | 0           | 0     | 0     | 0     | 0     | 0     | 0     | 1     |
+
+**Extension energy capacity** also scales with RCL (50 at RCL 1–6, 100 at RCL 7, 200 at RCL 8). Total spawn energy = spawn base + all extension capacity.
+
 ## Project-specific reminders
 
 - Prefer ID caching + `Game.getObjectById` for known objects.

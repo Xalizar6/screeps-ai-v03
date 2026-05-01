@@ -32,6 +32,15 @@ Use this skill when role logic changes in `src/roles/`.
 - Keep per-creep verbosity in `path`/`debugLazy`; avoid noisy information-level spam.
 - Ensure any new memory IDs are treated as soft references (`Game.getObjectById` + null checks).
 
+## Documentation upkeep
+
+After wiring a new role or modifying an existing one, check:
+
+- [ ] `src/roles/AGENTS.md` — update the **Current files** table if a new role file was added.
+- [ ] `README.md` — update the **Repo layout** tree and the **Current capabilities** table if the role changes what the bot can do.
+- [ ] `src/management/spawnManager.ts` — update body template comment and census rationale for the new role.
+- [ ] `docs/agent-references/gameplay-strategy.md` — update spawn priority order or economy flow if the role changes it.
+
 ## Human-in-the-Loop Checkpoint
 
 Before finalizing, summarize:

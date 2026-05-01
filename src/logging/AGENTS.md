@@ -64,6 +64,30 @@ Allowed values: `"error"` | `"information"` | `"verbose"` | `"debug"`. Invalid s
 
 Types: `LogConfigMemory` on `Memory.log` in `src/types.d.ts`.
 
+### Initialization (Screeps console)
+
+Paste into the Screeps console at any time — no deploy needed:
+
+```js
+// Typical: information level for everything
+Memory.log = { default: "information" };
+
+// Quiet: errors only
+Memory.log = { default: "error" };
+
+// Verbose: show path/branch markers
+Memory.log = { default: "verbose" };
+
+// Debug: everything including lazy debug strings
+Memory.log = { default: "debug" };
+
+// Mixed: quiet globally, loud for one subsystem
+Memory.log = { default: "information", modules: { harvester: "debug" } };
+
+// Reset to code defaults (each logger uses its createLogger defaultLevel)
+delete Memory.log;
+```
+
 ## Per-tick level cache
 
 Each logger resolves the effective level **once per `Game.time`** so `Memory` is not re-read on every log line inside tight loops (`logger.ts` caches after `getEffectiveLevel`).

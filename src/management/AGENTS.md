@@ -6,8 +6,39 @@ These instructions apply when working in `src/management/`.
 
 - Management modules coordinate **room/spawn-level decisions** (e.g. population targets, spawn queues, room-wide caching).
 - Avoid embedding detailed per-creep behavior here; delegate to role modules in `src/roles/`.
-- **Automated layout / construction planning** (e.g. where to place structures or sites) lives in dedicated modules such as `roomConstruction.ts`; if that grows, split under `construction/` and keep `roomManager` as the orchestrator that calls into them.
-- **Room-level persistent cache** (e.g. source IDs and nearby container IDs for energy routing) lives in **`roomCache.ts`** (`runRoomCache`); `roomManager` calls it each tick before construction planning. Extend here as you add more room-scoped cached data (minerals, links, etc.).
+- **Automated layout / construction planning** lives in `construction/`; `roomManager` is the orchestrator that calls into those modules.
+- **Room-level persistent cache** (source IDs and nearby container IDs for energy routing) lives in **`roomCache.ts`**; `roomManager` calls it each tick before construction planning. Extend here as you add more room-scoped cached data (minerals, links, etc.).
+
+## Current modules
+
+| File                                | Responsibility                                                              |
+| ----------------------------------- | --------------------------------------------------------------------------- |
+| `roomManager.ts`                    | Per-room orchestrator; calls all sub-managers in order each tick            |
+| `spawnManager.ts`                   | Census-based spawn queue; decides what and when to spawn                    |
+| `roomCache.ts`                      | Tick-scoped cache for `room.find(...)` results (sources, containers, sites) |
+| `structureCache.ts`                 | Tick-scoped cache for structures by type (spawns, extensions, towers, etc.) |
+| `roomConstruction.ts`               | Legacy construction-site placement; exports `CONSTRUCTION_PLAN_INTERVAL`    |
+| `shuttleDemand.ts`                  | Calculates shuttle population target based on energy demand                 |
+| `creepSnapshot.ts`                  | Builds a per-room, per-role index of live creeps once per tick              |
+| `creepMemoryGc.ts`                  | Cleans `Memory.creeps` entries for dead creeps each tick                    |
+| `tickSignals.ts`                    | Derives cross-module signals (e.g. construction-site counts by room)        |
+| `repairConfig.ts`                   | Repair thresholds and structure priority rules                              |
+| `construction/planGenerator.ts`     | Generates `RoomLayoutPlan` in `RoomMemory`                                  |
+| `construction/layoutConstructor.ts` | Places construction sites from the approved plan                            |
+| `construction/layoutVisualizer.ts`  | Renders plan overlays in-game for review                                    |
+
+## Execution order (per tick, per room)
+
+`roomManager.runRoomManagement` runs this sequence every tick:
+
+1. **`tickSignals`** — `countMyConstructionSitesByRoom()` (pre-loop, room-agnostic)
+2. **`roomCache`** — populates tick-scoped `room.find(...)` results
+3. **`structureCache`** — populates tick-scoped structure-by-type results
+4. **`planGenerator`** — updates `RoomLayoutPlan` in `RoomMemory` if needed
+5. **`layoutVisualizer`** — renders plan overlays (no writes to game state)
+6. **`roomConstruction` + `layoutConstructor`** — places construction sites _(gated: only runs every `CONSTRUCTION_PLAN_INTERVAL` = 100 ticks)_
+
+Spawn management runs **after** room management (called from `src/index.ts` using the creep snapshot).
 
 ## CPU + data flow expectations
 

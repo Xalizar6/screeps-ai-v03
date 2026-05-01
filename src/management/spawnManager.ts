@@ -13,15 +13,30 @@ export const LOG_MODULE = "spawnManager" as const;
 
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
+/**
+ * Minimum viable body (200 energy): one of each part so the creep can work, carry, and move.
+ * Used for upgraders and repairers where throughput scales with count rather than body size.
+ */
 const DEFAULT_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE];
-/** Extra MOVE vs {@link DEFAULT_BODY} so full CARRY does not slow travel as much. */
+/**
+ * Builder body (250 energy): extra MOVE vs {@link DEFAULT_BODY} so a full CARRY load does not
+ * incur fatigue, keeping the builder moving between site and energy source.
+ */
 const BUILDER_BODY: BodyPartConstant[] = [WORK, CARRY, MOVE, MOVE];
+/** Shuttle body from the default profile; see {@link SHUTTLE_PROFILE_BODIES} in shuttleDemand.ts. */
 const SHUTTLE_BODY: BodyPartConstant[] = [
   ...SHUTTLE_PROFILE_BODIES[DEFAULT_SHUTTLE_PROFILE_ID],
 ];
-/** Extra WORK vs {@link DEFAULT_BODY} to increase mining rate . */
+/**
+ * Harvester body (300 energy): extra WORK vs {@link DEFAULT_BODY} doubles mining rate (4/tick vs 2/tick)
+ * and fills the source container faster. One harvester is spawned per source.
+ */
 const HARVESTER_BODY: BodyPartConstant[] = [WORK, WORK, CARRY, MOVE];
 
+/**
+ * Returns the first source ID in the room not already claimed by an existing harvester,
+ * so each spawned harvester gets a dedicated source assignment.
+ */
 function pickUnclaimedSourceId(
   room: Room,
   harvesters: Creep[],
@@ -48,6 +63,10 @@ function pickUnclaimedSourceId(
   return undefined;
 }
 
+/**
+ * Returns the target harvester count for a room: one per source (from RoomMemory cache,
+ * or a live find if the cache is not yet populated).
+ */
 function getDesiredHarvesterCount(room: Room): number {
   const cachedSources = room.memory.sources;
   if (cachedSources) {
@@ -176,6 +195,7 @@ export const runSpawnManagement = (snapshot: CreepSnapshot): void => {
   }
 };
 
+/** Returns the total energy cost of a body array using the game's BODYPART_COST table. */
 function bodyCost(body: BodyPartConstant[]): number {
   let sum = 0;
   for (const part of body) {
