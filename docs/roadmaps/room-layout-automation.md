@@ -254,11 +254,11 @@ Phase 1 does **not** require copying community algorithms or visualization helpe
 ### Paths to plan
 
 1. **Spawn → each source** (range 1 from source) — the shuttle/builder highway
-2. **Each source → controller** (range 3 from controller) — the upgrader supply route
+2. **Each source → controller** (range 2 from controller) — the upgrader supply route
 
 A direct spawn→controller road is intentionally excluded: upgraders get energy from source containers (or the controller buffer container), so useful traffic flows through sources.
 
-**Controller-side road terminus**: the road stops at `range: 3` (the upgrader working zone / controller buffer container area), not at the controller itself. Can be refined later to target the buffer container position directly via `room.memory.controllerContainerId`.
+**Controller-side road terminus**: the road stops at `range: 2` (tighter ring around the upgrader / controller-buffer area), not on the controller tile. Can be refined later to target the buffer container position directly via `room.memory.controllerContainerId`. (`roomConstruction` buffer container placement still uses `CONTROLLER_BUFFER_CONTAINER_RANGE`.)
 
 ### Sequential Path Accumulation (critical for road merging)
 
@@ -334,7 +334,7 @@ A partially-built road path has fatigue gaps at unbuilt tiles, so finishing the 
 2. Verify in the client:
    - Paths merge near spawn (shared trunk, not parallel routes)
    - Spawn→source paths reach the source adjacency
-   - Source→controller paths end ~3 tiles from controller
+   - Source→controller paths end ~2 tiles from controller
    - No weird zigzags through walls
 3. If not satisfied: `delete Memory.rooms['<name>'].layoutPlan` → adjust parameters → re-check
 4. When happy: `Memory.rooms['<name>'].layoutApproved = true` → watch builders construct
@@ -545,6 +545,10 @@ Use this section when handing a phase to a fresh agent (new chat, background tas
 ### Prompt template
 
 Copy, fill in the bracketed fields, and paste as the opening message in a new session:
+
+> **Prompt conventions:** follow skill `/writing-agent-prompts` —
+> one copyable fence, indented code examples, checkpoint gate on human
+> approval, doc-upkeep checklist.
 
 ```text
 Implement Phase [N] of @docs/roadmaps/room-layout-automation.md only.

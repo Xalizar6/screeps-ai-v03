@@ -14,7 +14,7 @@ export const CONTROLLER_BUFFER_CONTAINER_RANGE = 3;
 
 const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
 
-const PATHFINDER_MAX_OPS = 4000;
+export const PATHFINDER_MAX_OPS = 4000;
 
 /** Defer heavy `PathFinder` / layout construction when the bucket is low (see Screeps CPU bucket docs). */
 export const MIN_BUCKET_FOR_CONSTRUCTION_PLAN = 1200;

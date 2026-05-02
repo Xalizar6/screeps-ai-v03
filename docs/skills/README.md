@@ -123,6 +123,13 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/writing-commit-messages/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/writing-commit-messages/SKILL.md`](../.agents/skills/writing-commit-messages/SKILL.md)
 
+### `writing-agent-prompts`
+
+- **Slash:** `/writing-agent-prompts`
+- **Purpose:** Author a single-block, copy-ready Composer2 handoff prompt with scope/out-of-scope, verify steps, human checkpoint, doc-upkeep checklist, and no roadmap checkbox until PTR/live approval.
+- **Typical prompt language:** write a prompt for a new chat, hand off to Composer2, background agent, roadmap phase delegation, scoped fix prompt.
+- **Source:** [`.agents/skills/writing-agent-prompts/SKILL.md`](../.agents/skills/writing-agent-prompts/SKILL.md)
+
 ### `systematic-debugging`
 
 - **Slash:** `/systematic-debugging`
@@ -143,6 +150,13 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 - **Purpose:** Stress-test a plan or design with sequential probing questions; align terminology with `AGENTS.md` / `docs/agent-references/`, verify claims against code, and suggest `architecture-decision-records` when a grilling outcome should be captured as an ADR.
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/grill-me/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/grill-me/SKILL.md`](../.agents/skills/grill-me/SKILL.md)
+
+### `design-session`
+
+- **Slash:** `/design-session`
+- **Purpose:** Activate a Senior Screeps Architect/mentor persona for structured problem discussion and design decisions, then produce a Composer2 handoff prompt. Best run with a high-capability model (Opus or Sonnet 4.6) in a dedicated chat; the implementer uses Composer2 with the default model.
+- **Typical prompt language:** design session, think through, weigh options, architecture discussion, hand off to Composer2, decision first.
+- **Source:** [`.agents/skills/design-session/SKILL.md`](../.agents/skills/design-session/SKILL.md)
 
 ### `architecture-decision-records`
 

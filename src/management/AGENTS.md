@@ -11,21 +11,21 @@ These instructions apply when working in `src/management/`.
 
 ## Current modules
 
-| File                                | Responsibility                                                              |
-| ----------------------------------- | --------------------------------------------------------------------------- |
-| `roomManager.ts`                    | Per-room orchestrator; calls all sub-managers in order each tick            |
-| `spawnManager.ts`                   | Census-based spawn queue; decides what and when to spawn                    |
-| `roomCache.ts`                      | Tick-scoped cache for `room.find(...)` results (sources, containers, sites) |
-| `structureCache.ts`                 | Tick-scoped cache for structures by type (spawns, extensions, towers, etc.) |
-| `roomConstruction.ts`               | Legacy construction-site placement; exports `CONSTRUCTION_PLAN_INTERVAL`    |
-| `shuttleDemand.ts`                  | Calculates shuttle population target based on energy demand                 |
-| `creepSnapshot.ts`                  | Builds a per-room, per-role index of live creeps once per tick              |
-| `creepMemoryGc.ts`                  | Cleans `Memory.creeps` entries for dead creeps each tick                    |
-| `tickSignals.ts`                    | Derives cross-module signals (e.g. construction-site counts by room)        |
-| `repairConfig.ts`                   | Repair thresholds and structure priority rules                              |
-| `construction/planGenerator.ts`     | Generates `RoomLayoutPlan` in `RoomMemory`                                  |
-| `construction/layoutConstructor.ts` | Places construction sites from the approved plan                            |
-| `construction/layoutVisualizer.ts`  | Renders plan overlays in-game for review                                    |
+| File                                | Responsibility                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `roomManager.ts`                    | Per-room orchestrator; calls all sub-managers in order each tick                                             |
+| `spawnManager.ts`                   | Census-based spawn queue; decides what and when to spawn                                                     |
+| `roomCache.ts`                      | Tick-scoped cache for `room.find(...)` results (sources, containers, sites)                                  |
+| `structureCache.ts`                 | Tick-scoped cache for structures by type (spawns, extensions, towers, etc.)                                  |
+| `roomConstruction.ts`               | Legacy construction-site placement; exports `CONSTRUCTION_PLAN_INTERVAL`                                     |
+| `shuttleDemand.ts`                  | Calculates shuttle population target based on energy demand                                                  |
+| `creepSnapshot.ts`                  | Builds a per-room, per-role index of live creeps once per tick                                               |
+| `creepMemoryGc.ts`                  | Cleans `Memory.creeps` entries for dead creeps each tick                                                     |
+| `tickSignals.ts`                    | Derives cross-module signals (e.g. construction-site counts by room)                                         |
+| `repairConfig.ts`                   | Repair thresholds and structure priority rules                                                               |
+| `construction/planGenerator.ts`     | Computes spawn↔source↔controller road paths into `RoomLayoutPlan` (sequential PathFinder + CostMatrix merge) |
+| `construction/layoutConstructor.ts` | Places construction sites from the approved plan                                                             |
+| `construction/layoutVisualizer.ts`  | Renders plan overlays in-game for review                                                                     |
 
 ## Execution order (per tick, per room)
 

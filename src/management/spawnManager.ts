@@ -32,6 +32,8 @@ const SHUTTLE_BODY: BodyPartConstant[] = [
  * and fills the source container faster. One harvester is spawned per source.
  */
 const HARVESTER_BODY: BodyPartConstant[] = [WORK, WORK, CARRY, MOVE];
+/** Upper bound on simultaneous builders so large construction bursts do not overshoot room energy supply. */
+const MAX_BUILDERS = 3;
 
 /**
  * Returns the first source ID in the room not already claimed by an existing harvester,
@@ -155,7 +157,10 @@ export const runSpawnManagement = (snapshot: CreepSnapshot): void => {
     const builders = bucket.builders;
 
     const unfinishedSites = spawn.room.memory.myConstructionSiteCount ?? 0;
-    const desiredBuilders = Math.ceil(unfinishedSites / 3);
+    const desiredBuilders = Math.min(
+      Math.ceil(unfinishedSites / 3),
+      MAX_BUILDERS,
+    );
 
     if (builders.length < desiredBuilders) {
       const code = spawn.spawnCreep(BUILDER_BODY, `builder-${Game.time}`, {
@@ -163,7 +168,7 @@ export const runSpawnManagement = (snapshot: CreepSnapshot): void => {
       });
       log.debugLazy(
         () =>
-          `spawn=${spawn.name} branch=builder have=${builders.length} desired=${desiredBuilders} sites=${unfinishedSites} bodyCost=${bodyCost(
+          `spawn=${spawn.name} branch=builder have=${builders.length} desired=${desiredBuilders} max=${MAX_BUILDERS} sites=${unfinishedSites} bodyCost=${bodyCost(
             BUILDER_BODY,
           )} energy=${spawn.room.energyAvailable} code=${code}`,
       );

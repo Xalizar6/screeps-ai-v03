@@ -90,17 +90,18 @@ To add or evolve a role, use the project skill at `.agents/skills/adding-a-creep
 
 What the bot does today (update this section as features ship):
 
-| Capability                         | Status | Notes                                                                                    |
-| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| Harvest energy from sources        | ✓      | Harvester parks at source container when shuttles present; falls back to direct delivery |
-| Shuttle energy to spawn/extensions | ✓      | Demand-based population; withdraws from source containers, picks up dropped energy       |
-| Upgrade room controller            | ✓      | Upgrader withdraws from controller-adjacent container                                    |
-| Build construction sites           | ✓      | Builder count scales with site backlog (`ceil(sites/3)`)                                 |
-| Repair damaged structures          | ✓      | Repairer count scales with repair backlog; priority-ordered by structure type            |
-| Autonomous construction placement  | ✓      | Layout plan generated from RCL; sites placed every 100 ticks                             |
-| Layout visualization               | ✓      | Plan overlays rendered in-game for review/approval                                       |
-| Multi-room expansion               | ✗      | Planned — see `docs/roadmaps/room-layout-automation.md`                                  |
-| Defense / towers                   | ✗      | Not yet implemented                                                                      |
+| Capability                         | Status | Notes                                                                                             |
+| ---------------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| Harvest energy from sources        | ✓      | Harvester parks at source container when shuttles present; falls back to direct delivery          |
+| Shuttle energy to spawn/extensions | ✓      | Demand-based population; withdraws from source containers, picks up dropped energy                |
+| Upgrade room controller            | ✓      | Upgrader withdraws from controller-adjacent container                                             |
+| Build construction sites           | ✓      | Builder count scales with site backlog (`ceil(sites/3)`)                                          |
+| Repair damaged structures          | ✓      | Repairer count scales with repair backlog; priority-ordered by structure type                     |
+| Autonomous construction placement  | ✓      | Layout plan (roads via PathFinder merge + future structures); sites every 100 ticks when approved |
+| Layout visualization               | ✓      | Plan overlays rendered in-game for review/approval                                                |
+| Road layout planning               | ✓      | Spawn→source (r1) and source→controller (r2) paths merge via shared CostMatrix accumulation       |
+| Multi-room expansion               | ✗      | Planned — see `docs/roadmaps/room-layout-automation.md`                                           |
+| Defense / towers                   | ✗      | Not yet implemented                                                                               |
 
 ## Logging
 
