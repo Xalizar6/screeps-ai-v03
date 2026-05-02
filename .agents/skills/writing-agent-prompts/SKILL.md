@@ -27,27 +27,10 @@ Write every prompt in this order:
 4. **Out of scope** — name files and features explicitly excluded.
 5. **Standards** — @-mention `AGENTS.md` files and skills the agent must follow.
 6. **Verify** — `npm run fix` then `npm run build`, on separate lines (PowerShell).
-7. **When build passes** — summary for human review; include the required
-   **no-checkbox** sentence from **Checkpoint rule** below (name the phase or task).
+7. **When build passes** — summarize what changed for human review.
 8. **Documentation upkeep** — paste the **Documentation upkeep checklist** below
    (always for management changes; for other work, trim bullets that do not apply).
-9. **Human checkpoint** — PTR/live test steps; checkbox rule below.
-
-## Checkpoint rule (critical)
-
-The progress checkbox (e.g. `- [x] Phase N` in a roadmap) is updated **only**
-after the human approves the PTR or live test results. **Never** treat build
-success alone as approval to tick the box.
-
-The **When build passes** section of every handoff prompt must say, verbatim in
-substance:
-
-> Do NOT mark [phase/task] complete. The checkbox is updated only after the
-> human approves the results in the Human checkpoint below.
-
-(Replace `[phase/task]` with the concrete phase name or task.)
-
-The agent must **not** mark a roadmap phase complete on its own.
+9. **Human checkpoint** — structured PTR/live in-game verification steps (what to observe).
 
 ## Formatting rule
 
