@@ -93,6 +93,14 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/codebase-onboarding/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/codebase-onboarding/SKILL.md`](../.agents/skills/codebase-onboarding/SKILL.md)
 
+### `zoom-out`
+
+- **Slash:** `/zoom-out`
+- **Purpose:** Mid-session abstraction lift: concise map of relevant modules / callers using this repo's Screeps vocabulary; lighter than `parallel-exploring` or `codebase-onboarding`.
+- **Typical prompt language:** zoom out, bigger picture, how does this fit, map the callers.
+- **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/zoom-out/references/ATTRIBUTION.md)
+- **Source:** [`.agents/skills/zoom-out/SKILL.md`](../.agents/skills/zoom-out/SKILL.md)
+
 ### `building-skills-from-patterns`
 
 - **Slash:** `/building-skills-from-patterns`
@@ -106,6 +114,21 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 - **Purpose:** Structured code review checklist (includes a short Screeps lens in the skill body).
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/reviewing-code/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/reviewing-code/SKILL.md`](../.agents/skills/reviewing-code/SKILL.md)
+
+### `writing-commit-messages`
+
+- **Slash:** `/writing-commit-messages`
+- **Purpose:** Conventional commit format: types, optional scope, imperative subject, body for rationale, footers for breaking changes and issue links.
+- **Typical prompt language:** commit message, conventional commit, squash message, PR title, changelog entry.
+- **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/writing-commit-messages/references/ATTRIBUTION.md)
+- **Source:** [`.agents/skills/writing-commit-messages/SKILL.md`](../.agents/skills/writing-commit-messages/SKILL.md)
+
+### `writing-agent-prompts`
+
+- **Slash:** `/writing-agent-prompts`
+- **Purpose:** Author a single-block, copy-ready Composer2 handoff prompt with scope/out-of-scope, verify steps, human checkpoint, doc-upkeep checklist, and no roadmap checkbox until PTR/live approval.
+- **Typical prompt language:** write a prompt for a new chat, hand off to Composer2, background agent, roadmap phase delegation, scoped fix prompt.
+- **Source:** [`.agents/skills/writing-agent-prompts/SKILL.md`](../.agents/skills/writing-agent-prompts/SKILL.md)
 
 ### `systematic-debugging`
 
@@ -124,9 +147,16 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 ### `grill-me`
 
 - **Slash:** `/grill-me`
-- **Purpose:** Stress-test a plan or design with sequential probing questions.
+- **Purpose:** Stress-test a plan or design with sequential probing questions; align terminology with `AGENTS.md` / `docs/agent-references/`, verify claims against code, and suggest `architecture-decision-records` when a grilling outcome should be captured as an ADR.
 - **Attribution:** [references/ATTRIBUTION.md](../.agents/skills/grill-me/references/ATTRIBUTION.md)
 - **Source:** [`.agents/skills/grill-me/SKILL.md`](../.agents/skills/grill-me/SKILL.md)
+
+### `design-session`
+
+- **Slash:** `/design-session`
+- **Purpose:** Activate a Senior Screeps Architect/mentor persona for structured problem discussion and design decisions, then produce a Composer2 handoff prompt. Best run with a high-capability model (Opus or Sonnet 4.6) in a dedicated chat; the implementer uses Composer2 with the default model.
+- **Typical prompt language:** design session, think through, weigh options, architecture discussion, hand off to Composer2, decision first.
+- **Source:** [`.agents/skills/design-session/SKILL.md`](../.agents/skills/design-session/SKILL.md)
 
 ### `architecture-decision-records`
 
@@ -140,7 +170,7 @@ Slash commands use the skill `name` from each `SKILL.md` frontmatter (type `/` i
 1. Start a **new Agent** chat for one focused task.
 2. Describe the task in natural language; add **trigger phrases** from the catalog if you want stronger auto-invocation.
 3. For role wiring or API-sensitive behavior, **manually invoke** `/adding-a-creep-role` and/or `/checking-screeps-api` before or at the start of the task. For management-only work use `/screeps-management-change`; for deploy/build use `/building-and-deploying-screeps`.
-4. Run `npm run fix` then `npm run build` (see [`AGENTS.md`](../AGENTS.md) for PowerShell chaining), or follow `/building-and-deploying-screeps`.
+4. Run `npm run fix` then `npm run build` (see [`AGENTS.md`](../../AGENTS.md) for PowerShell chaining), or follow `/building-and-deploying-screeps`.
 5. Optionally append a **Pilot Log** entry below with auto-invoked yes/no and what worked.
 
 ## When New Skills Are Added

@@ -21,6 +21,14 @@ Use when working under `src/management/`.
 - `docs/agent-references/screeps-api.md` (room queries, CPU bucket, soft references)
 - `docs/agent-references/screeps-overview.md` (gameplay assumptions, data flow)
 
+## Documentation upkeep
+
+After a management change, check:
+
+- [ ] `src/management/AGENTS.md` — update the **Current modules** table if a new file was added or a module's responsibility changed; update the **Execution order** section if the call order in `roomManager.ts` changed.
+- [ ] `README.md` — update the **Repo layout** tree if new files were added; update **Current capabilities** if behavior changed.
+- [ ] `docs/agent-references/gameplay-strategy.md` — update spawn priority or economy flow if the change affects room/spawn policy.
+
 ## Human-in-the-Loop Checkpoint
 
 Summarize which management modules changed, any new memory fields, and CPU/caching impact before merge.

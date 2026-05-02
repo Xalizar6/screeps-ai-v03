@@ -8,7 +8,10 @@ import { LogLevel } from "../logging/levels";
 
 export const LOG_MODULE = "fsm" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "roles",
+});
 
 /** Allowed FSM state names across roles; mirrors `CreepMemory["state"]`. */
 export type RoleFsmState = NonNullable<CreepMemory["state"]>;

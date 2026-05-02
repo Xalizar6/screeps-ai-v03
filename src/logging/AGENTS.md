@@ -6,7 +6,7 @@ These instructions apply when working in `src/logging/` and when adding or chang
 
 - `logger.ts` — `createLogger`, `Logger` API (`error`, `info`, `stat`, `path`, `debugLazy`, `moduleScope`, `blankLineAfterTick`).
 - `levels.ts` — numeric `LogLevel`, string names (`LogLevelName`), `parseLogLevel` / `levelToString`.
-- `resolveLevel.ts` — `getEffectiveLevel(moduleId, codeDefault)` reads `Memory.log` and applies overrides.
+- `resolveLevel.ts` — `getEffectiveLevel(moduleId, codeDefault, group?)` reads `Memory.log` and applies overrides (module → optional group → default → code default).
 
 ## JSDoc
 
@@ -20,7 +20,7 @@ Each subsystem that logs should export a **single stable string id** used everyw
 export const LOG_MODULE = "spawnManager" as const;
 ```
 
-Pass `LOG_MODULE` into `createLogger(LOG_MODULE, { defaultLevel: ... })`. The string must stay stable across deploys so `Memory.log.modules` overrides keep working.
+Pass `LOG_MODULE` into `createLogger(LOG_MODULE, { defaultLevel: ..., group?: ... })`. The string must stay stable across deploys so `Memory.log.modules` overrides keep working. Use `group` for shared console leveling via `Memory.log.groups` (see **Effective level** below).
 
 **Who exports it**
 
@@ -57,12 +57,41 @@ Optional; no deploy required:
 
 - `Memory.log.default` — global default level name.
 - `Memory.log.modules[<moduleId>]` — per-module override; `moduleId` is the same string as `LOG_MODULE` / `createLogger`’s first argument.
+- `Memory.log.groups[<groupKey>]` — shared override for all loggers created with matching `group` in `createLogger` options (e.g. `"management"`, `"roles"`). Applied after per-module and before `Memory.log.default`.
 
 Allowed values: `"error"` | `"information"` | `"verbose"` | `"debug"`. Invalid strings are ignored.
 
-**Effective level:** `Memory.log.modules[id] ?? Memory.log.default ?? code default` (see `getEffectiveLevel` in `resolveLevel.ts`).
+**Effective level:** `Memory.log.modules[id] ?? Memory.log.groups[group] ?? Memory.log.default ?? code default` (see `getEffectiveLevel` in `resolveLevel.ts`). Loggers without a `group` skip the `groups` step.
 
 Types: `LogConfigMemory` on `Memory.log` in `src/types.d.ts`.
+
+### Initialization (Screeps console)
+
+Paste into the Screeps console at any time — no deploy needed:
+
+```js
+// Typical: information level for everything
+Memory.log = { default: "information" };
+
+// Quiet: errors only
+Memory.log = { default: "error" };
+
+// Verbose: show path/branch markers
+Memory.log = { default: "verbose" };
+
+// Debug: everything including lazy debug strings
+Memory.log = { default: "debug" };
+
+// Groups: all management or all role loggers at once (see createLogger `group`)
+Memory.log = { default: "error", groups: { management: "debug" } };
+Memory.log = { default: "error", groups: { roles: "debug" } };
+
+// Mixed: quiet globally, loud for one subsystem
+Memory.log = { default: "information", modules: { harvester: "debug" } };
+
+// Reset to code defaults (each logger uses its createLogger defaultLevel)
+delete Memory.log;
+```
 
 ## Per-tick level cache
 

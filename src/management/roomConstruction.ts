@@ -12,12 +12,15 @@ export const CONSTRUCTION_PLAN_INTERVAL = 100;
  */
 export const CONTROLLER_BUFFER_CONTAINER_RANGE = 3;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 
-const PATHFINDER_MAX_OPS = 4000;
+export const PATHFINDER_MAX_OPS = 4000;
 
-/** Defer heavy `PathFinder` work when the bucket is low (see Screeps CPU bucket docs). */
-const MIN_BUCKET_FOR_CONSTRUCTION_PLAN = 1200;
+/** Defer heavy `PathFinder` / layout construction when the bucket is low (see Screeps CPU bucket docs). */
+export const MIN_BUCKET_FOR_CONSTRUCTION_PLAN = 1200;
 
 /** Deterministic order: nested dx, then dy (same as fallback scan). */
 function adjacentPositions(sourcePos: RoomPosition): RoomPosition[] {

@@ -13,7 +13,10 @@ import {
 
 export const LOG_MODULE = "shuttle" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "roles",
+});
 const DELIVERY_PRIORITY: readonly StructureConstant[] = [
   STRUCTURE_SPAWN,
   STRUCTURE_EXTENSION,

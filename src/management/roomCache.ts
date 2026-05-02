@@ -10,7 +10,10 @@ export const LOG_MODULE = "roomCache" as const;
 /** Re-scan for containers near sources when missing; aligned with construction cadence. */
 export const CONTAINER_RESCAN_INTERVAL = CONSTRUCTION_PLAN_INTERVAL;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 
 function pickContainerNearSource(
   source: Source,

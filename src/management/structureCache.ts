@@ -8,7 +8,10 @@ type CachedStructures = {
   structures: AnyStructure[];
 };
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 const structuresByRoom = new Map<string, CachedStructures>();
 
 function scanStructures(room: Room): AnyStructure[] {

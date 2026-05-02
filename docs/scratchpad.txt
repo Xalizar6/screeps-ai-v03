@@ -22,6 +22,10 @@ Notes:
             Room: W3S1
             Web: http://jayseegames.com:21025/web/
 
+        Public Test Realm (PTR)
+            Room: sim
+            Web: https://screeps.com/ptr/#!/sim/survival
+
 
 Screeps console commands
 
@@ -33,7 +37,7 @@ Screeps console commands
         Memory.log = { default: "information", modules: {shuttle: "debug" } }; // one subsystem loud
         Memory.log = { default: "information", 
             modules: {
-                harvester: "debug",
+                harvester: "information",
                 shuttle: "information",
                 upgrader: "information",
                 builder: "information",
@@ -46,6 +50,21 @@ Screeps console commands
             } };
 
         delete Memory.log; // back to code defaults
+
+    // Toggle visualization
+        Memory.rooms["sim"].layoutVisualize = true; // turn on overlay
+        Memory.rooms["W1N1"].layoutVisualize = false; // turn off overlay
+
+    // Filter by RCL layer
+        Memory.rooms["W1N1"].layoutVisualizeRcl = 3; // show only RCL 3 items
+        Memory.rooms["W1N1"].layoutVisualizeRcl = 0; // show all layers
+        delete Memory.rooms["W1N1"].layoutVisualizeRcl; // same as 0
+
+    // Re-trigger plan generation (iterate)
+        delete Memory.rooms["W1N1"].layoutPlan; // clears plan; generator runs next tick
+
+    // Approve for construction
+        Memory.rooms["sim"].layoutApproved = true; // constructor starts placing sites
 
     Signage
         Game.creeps['upgrader-5492007'].signController(Game.rooms['W3S1'].controller, '') # must be within range 1 of the controller

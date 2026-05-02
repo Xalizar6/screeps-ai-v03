@@ -11,11 +11,15 @@ import {
 
 export const LOG_MODULE = "harvester" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "roles",
+});
 
 type HarvesterState = "harvest" | "deliver";
 type FallbackDeliveryTarget = StructureSpawn | StructureExtension;
 
+/** Ensures the creep has a valid harvester state, defaulting to "harvest" on first run or stale state. */
 function ensureState(creep: Creep): HarvesterState {
   if (creep.memory.state !== "harvest" && creep.memory.state !== "deliver") {
     creep.memory.state = "harvest";
@@ -24,6 +28,7 @@ function ensureState(creep: Creep): HarvesterState {
   return creep.memory.state === "deliver" ? "deliver" : "harvest";
 }
 
+/** Returns the creep's assigned source from memory, or finds and caches the closest active source as fallback. */
 function resolveAssignedSource(creep: Creep): Source | null {
   const sourceId = creep.memory.sourceId;
   if (sourceId) {
@@ -41,6 +46,7 @@ function resolveAssignedSource(creep: Creep): Source | null {
   return fallback;
 }
 
+/** Returns the container adjacent to the assigned source from RoomMemory, clearing the cached ID if the container is gone. */
 function resolveSourceContainer(
   creep: Creep,
   source: Source,
@@ -57,6 +63,10 @@ function resolveSourceContainer(
   return null;
 }
 
+/**
+ * Returns the cached spawn or extension with free energy capacity, or finds and caches the closest one.
+ * Used only in emergency-deliver mode when no shuttles are present.
+ */
 function resolveFallbackDeliveryTarget(
   creep: Creep,
 ): FallbackDeliveryTarget | null {
@@ -88,6 +98,7 @@ function resolveFallbackDeliveryTarget(
   return null;
 }
 
+/** Returns true if any spawn or extension in the room has free energy capacity, triggering emergency delivery mode. */
 function roomHasEnergyAcceptingSpawnOrExtensions(room: Room): boolean {
   return (
     room.find(FIND_MY_STRUCTURES, {
@@ -99,6 +110,10 @@ function roomHasEnergyAcceptingSpawnOrExtensions(room: Room): boolean {
   );
 }
 
+/**
+ * Harvest state: move to source container (or source directly) and mine.
+ * In emergency mode (no shuttles, spawn needs energy) mines and delivers directly instead of filling container.
+ */
 function runHarvest(creep: Creep): void {
   const shuttleCreeps = getShuttleCreepCountInRoom(creep.room.name);
   if (shuttleCreeps === 0 && isStoreFull(creep)) {
@@ -173,6 +188,10 @@ function runHarvest(creep: Creep): void {
   }
 }
 
+/**
+ * Deliver state: fallback direct delivery to spawn/extensions when no shuttles are present.
+ * Transitions back to harvest as soon as a shuttle appears or the carry store empties.
+ */
 function runDeliver(creep: Creep): void {
   if (getShuttleCreepCountInRoom(creep.room.name) > 0) {
     transitionState(creep, "harvest");

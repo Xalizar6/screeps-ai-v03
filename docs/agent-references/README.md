@@ -1,4 +1,4 @@
-# Agent References (Screeps AI v03)
+﻿# Agent References (Screeps AI v03)
 
 This folder is the **shared reference library** and the **source of truth** for Screeps **runtime behavior** (ticks, intents, simultaneous actions, `Game`/`Memory`, CPU bucket, debugging expectations) as curated for this repo.
 
@@ -26,8 +26,16 @@ This folder is the **shared reference library** and the **source of truth** for 
   - **Action priority matrix**, intent timing, `Game`/`Memory`, CPU bucket, return codes, `Room.find`, `Game.getObjectById`.
   - When changing **creep actions**, FSM transitions tied to stores, or **same-tick** multi-intent behavior.
 
+- `gameplay-strategy.md`
+  - **Current economy assumptions**: energy flow (source -> container -> shuttle -> structures), spawn priority order, construction cadence.
+  - When changing **spawn targets**, **role population policy**, or **economy routing**.
+
 - `external-example-codebases.md`
   - When you want **optional pointers** to other open-source Screeps AIs (bonzAI, Overmind, Nooby Guide) for patterns and vocabulary — not mirrored here; adapt to this repo’s standards.
+
+## Long-running roadmaps (tracked in repo)
+
+- [`../roadmaps/room-layout-automation.md`](../roadmaps/room-layout-automation.md) — phased plan for automated room layout (roads, extensions, towers, distance transform, min-cut); checkboxes for progress across sessions.
 
 ## How we use references in this repo
 
