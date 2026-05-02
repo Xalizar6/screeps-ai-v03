@@ -31,6 +31,9 @@ Write every prompt in this order:
 8. **Documentation upkeep** — paste the **Documentation upkeep checklist** below
    (always for management changes; for other work, trim bullets that do not apply).
 9. **Human checkpoint** — structured PTR/live in-game verification steps (what to observe).
+   Include **specific console commands** to run (or scripts to invoke), **what output to look
+   for**, and **what to paste back** to an agent so the result can be validated—not only vague
+   "watch behavior" bullets.
 
 ## Formatting rule
 

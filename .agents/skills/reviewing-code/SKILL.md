@@ -40,11 +40,15 @@ Use this skill when the user asks for a code review, feedback on their code, or 
 - Are function return types explicit for public APIs?
 - Are union types handled exhaustively?
 
-6. **Check testing**
+6. **Check runtime verification** (no automated test runner — verify in-game)
 
-- Are there tests for the new/changed code?
-- Do tests cover the happy path AND error cases?
-- Are tests isolated (no shared mutable state)?
+- Does the change produce observable, capturable output (log lines via `moduleScope` / `debugLazy`, `JSON.stringify(Memory.someKey)`, CPU readings, visual overlays)?
+- Does the human checkpoint specify what output to capture and how (console command to run, what to look for)?
+- Can the captured output be pasted back to an agent for validation, or is approval purely subjective observation?
+- Does the checkpoint cover at least one edge or failure case, not just the happy path?
+- **Reviewer action:** If capture instructions are missing, use a **Should fix** finding that
+  **includes** drafted console commands, expected signals in the capture, and a paste-back
+  snippet—not only a gap note.
 
 7. **Provide feedback** — organize findings by severity:
 
