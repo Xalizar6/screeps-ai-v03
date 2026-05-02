@@ -49,6 +49,7 @@ type LogLevelName = "error" | "information" | "verbose" | "debug";
 interface LogConfigMemory {
   default?: LogLevelName;
   modules?: Partial<Record<string, LogLevelName>>;
+  groups?: Partial<Record<string, LogLevelName>>;
 }
 
 interface Memory {

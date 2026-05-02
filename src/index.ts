@@ -25,27 +25,35 @@ const loopLogger = createLogger("mainLoop", {
 });
 const creepMemoryGcLogger = createLogger(creepMemoryGcModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 const roomLogger = createLogger(roomManagerModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 const spawnLogger = createLogger(spawnManagerModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 const harvesterLogger = createLogger(harvesterModule, {
   defaultLevel: LogLevel.Information,
+  group: "roles",
 });
 const builderLogger = createLogger(builderModule, {
   defaultLevel: LogLevel.Information,
+  group: "roles",
 });
 const upgraderLogger = createLogger(upgraderModule, {
   defaultLevel: LogLevel.Information,
+  group: "roles",
 });
 const repairerLogger = createLogger(repairerModule, {
   defaultLevel: LogLevel.Information,
+  group: "roles",
 });
 const shuttleLogger = createLogger(shuttleModule, {
   defaultLevel: LogLevel.Information,
+  group: "roles",
 });
 
 /** Sums creep-array lengths across all room buckets for `moduleScope` stats. */

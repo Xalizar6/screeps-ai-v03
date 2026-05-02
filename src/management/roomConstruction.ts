@@ -12,7 +12,10 @@ export const CONSTRUCTION_PLAN_INTERVAL = 100;
  */
 export const CONTROLLER_BUFFER_CONTAINER_RANGE = 3;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 
 export const PATHFINDER_MAX_OPS = 4000;
 

@@ -3,7 +3,10 @@ import { LogLevel } from "../../logging/levels";
 
 export const LOG_MODULE = "layoutVisualizer" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 
 /** Distinct stroke colors for road segment overlays (rotated by segment index). */
 const ROAD_SEGMENT_PALETTE = [

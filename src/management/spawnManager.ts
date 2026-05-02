@@ -11,7 +11,10 @@ import {
 
 export const LOG_MODULE = "spawnManager" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 
 /**
  * Minimum viable body (200 energy): one of each part so the creep can work, carry, and move.

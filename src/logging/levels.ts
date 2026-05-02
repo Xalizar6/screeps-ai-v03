@@ -9,6 +9,9 @@ export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel];
 
 export type LogLevelName = "error" | "information" | "verbose" | "debug";
 
+/** Known `createLogger({ group })` ids; keys should match `Memory.log.groups` entries used from code. */
+export type LogGroup = "management" | "roles";
+
 const NAME_TO_LEVEL: Record<LogLevelName, LogLevel> = {
   error: LogLevel.Error,
   information: LogLevel.Information,

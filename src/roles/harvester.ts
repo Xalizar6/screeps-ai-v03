@@ -11,7 +11,10 @@ import {
 
 export const LOG_MODULE = "harvester" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "roles",
+});
 
 type HarvesterState = "harvest" | "deliver";
 type FallbackDeliveryTarget = StructureSpawn | StructureExtension;

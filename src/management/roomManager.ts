@@ -27,18 +27,23 @@ export const LOG_MODULE = "roomManager" as const;
 
 const roomCacheLogger = createLogger(roomCacheModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 const structureCacheLogger = createLogger(structureCacheModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 const planGeneratorLogger = createLogger(planGeneratorModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 const layoutVisualizerLogger = createLogger(layoutVisualizerModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 const layoutConstructorLogger = createLogger(layoutConstructorModule, {
   defaultLevel: LogLevel.Information,
+  group: "management",
 });
 
 export const runRoomManagement = (): void => {

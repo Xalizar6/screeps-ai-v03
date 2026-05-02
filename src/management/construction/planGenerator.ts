@@ -10,7 +10,10 @@ export const LOG_MODULE = "planGenerator" as const;
 /** Chebyshev range from the controller where source→controller planned roads stop. */
 const LAYOUT_CONTROLLER_ROAD_RANGE = 2;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 
 /** Single spawn→source or source→controller path job for sequential CostMatrix accumulation. */
 interface RoadPathJob {

@@ -14,7 +14,10 @@ import {
 
 export const LOG_MODULE = "builder" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "roles",
+});
 
 type BuilderState = "harvest" | "build";
 

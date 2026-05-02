@@ -4,7 +4,10 @@ import { MIN_BUCKET_FOR_CONSTRUCTION_PLAN } from "../roomConstruction";
 
 export const LOG_MODULE = "layoutConstructor" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "management",
+});
 
 /**
  * @returns Whether the controller level allows building planned items tagged with `planRcl` (`0` = always).

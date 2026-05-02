@@ -15,7 +15,10 @@ import {
 
 export const LOG_MODULE = "upgrader" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "roles",
+});
 
 type UpgraderState = "harvest" | "upgrade";
 

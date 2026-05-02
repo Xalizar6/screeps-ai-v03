@@ -1,8 +1,10 @@
-import { LogLevel } from "./levels";
+import { LogLevel, type LogGroup } from "./levels";
 import { getEffectiveLevel } from "./resolveLevel";
 
 export interface CreateLoggerOptions {
   defaultLevel: LogLevel;
+  /** When set, `Memory.log.groups[group]` applies after per-module and before `Memory.log.default`. */
+  group?: LogGroup;
 }
 
 export interface Logger {
@@ -25,18 +27,19 @@ function formatLine(moduleId: string, tag: string, body: string): string {
   return `[tick=${Game.time}][${moduleId}][${tag}] ${body}`;
 }
 
+/** Builds a tick-level-cached logger; effective verbosity follows `getEffectiveLevel`. */
 export function createLogger(
   moduleId: string,
   options: CreateLoggerOptions,
 ): Logger {
-  const { defaultLevel } = options;
+  const { defaultLevel, group } = options;
   let lastResolvedTick = -1;
   let cachedLevel: LogLevel = defaultLevel;
 
   const currentLevel = (): LogLevel => {
     if (lastResolvedTick !== Game.time) {
       lastResolvedTick = Game.time;
-      cachedLevel = getEffectiveLevel(moduleId, defaultLevel);
+      cachedLevel = getEffectiveLevel(moduleId, defaultLevel, group);
     }
     return cachedLevel;
   };

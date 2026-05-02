@@ -4,7 +4,10 @@ import { getObjectByIdOrNull, resolveSource } from "./fsm";
 
 export const LOG_MODULE = "energyAcquisition" as const;
 
-const log = createLogger(LOG_MODULE, { defaultLevel: LogLevel.Information });
+const log = createLogger(LOG_MODULE, {
+  defaultLevel: LogLevel.Information,
+  group: "roles",
+});
 
 function findBestSourceContainer(
   creep: Creep,
