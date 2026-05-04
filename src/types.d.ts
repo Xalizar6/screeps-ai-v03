@@ -55,7 +55,53 @@ interface LogConfigMemory {
 interface Memory {
   creeps?: Record<string, CreepMemory>;
   log?: LogConfigMemory;
+  /** Per-room persistent state (layout, sources cache, etc.); keys are room names. */
+  rooms?: Record<string, RoomMemory>;
 }
+
+/** `Memory.log` + room console helpers under `global.xai`. */
+interface GlobalXaiLog {
+  help(): string;
+  set(
+    level: LogLevelName,
+    overrides?: Pick<LogConfigMemory, "modules" | "groups">,
+  ): string;
+  reset(): string;
+  setGroup(group: string, level: LogLevelName): string;
+  clearGroup(group: string): string;
+  setModule(module: string, level: LogLevelName): string;
+  clearModule(module: string): string;
+}
+
+/** Room layout / Memory.rooms console helpers under `global.xai.room`. */
+interface GlobalXaiRoom {
+  help(): string;
+  use(roomName: string): string;
+  viz(roomName?: string): string;
+  noviz(roomName?: string): string;
+  rclFilter(rcl?: number, roomName?: string): string;
+  clearPlan(roomName?: string): string;
+  approve(roomName?: string): string;
+  unapprove(roomName?: string): string;
+}
+
+/** Console helper namespace attached to `global.xai` from `src/console.ts`. */
+interface GlobalXai {
+  help(): string;
+  log: GlobalXaiLog;
+  room: GlobalXaiRoom;
+}
+
+declare global {
+  /** So `globalThis.xai` / `global.xai` assignments in bootstrap code typecheck. */
+  interface GlobalThis {
+    xai: GlobalXai;
+  }
+}
+
+// Ambient global for screeps console `xai` (matches runtime `global.xai`); `var` is standard for declare.
+// eslint-disable-next-line no-var -- ambient global binding; `var` matches TS handbook / Screeps examples
+declare var xai: GlobalXai;
 
 /** One planned road polyline; coordinates are room-local [x, y] tiles (serializable). */
 interface RoadSegmentPlan {

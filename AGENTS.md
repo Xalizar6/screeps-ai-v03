@@ -41,6 +41,10 @@ Consult **[`docs/agent-references/README.md`](docs/agent-references/README.md)**
 
 When build, deploy, layout, or agent/contributor workflows change: update **`README.md`**, any affected nested **`README.md`**, this file for **repo-wide** rules only, and nested **`AGENTS.md`** for folder contracts. Keep edits scoped to what the code change touched.
 
+## Console helpers (`xai`)
+
+For console helpers (`xai`), see [`docs/xai-console.md`](docs/xai-console.md) before adding or modifying commands.
+
 ## Personal notes
 
 Treat `docs/scratchpad.*` as personal notes only—not project reference unless the user points you there.

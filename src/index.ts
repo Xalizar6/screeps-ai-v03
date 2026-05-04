@@ -1,3 +1,4 @@
+import { xai } from "./console";
 import { createLogger } from "./logging/logger";
 import { LogLevel } from "./logging/levels";
 import { buildCreepSnapshot } from "./management/creepSnapshot";
@@ -55,6 +56,9 @@ const shuttleLogger = createLogger(shuttleModule, {
   defaultLevel: LogLevel.Information,
   group: "roles",
 });
+
+/** In-game console helpers (`xai.log`, `xai.room`); assigned once per global reset (same object as `globalThis` in Screeps). */
+global.xai = xai;
 
 /** Sums creep-array lengths across all room buckets for `moduleScope` stats. */
 function sumBucketRoleCount(
