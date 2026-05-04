@@ -34,37 +34,26 @@ Screeps console commands
         Memory.log = { default: "error" }; // quiet
         Memory.log = { default: "verbose" }; // + path
         Memory.log = { default: "debug" }; // + debugLazy
-        Memory.log = { default: "information", modules: {shuttle: "debug" } }; // one subsystem loud
-        Memory.log = { default: "information", 
-            modules: {
-                harvester: "information",
-                shuttle: "information",
-                upgrader: "information",
-                builder: "information",
-                repairer: "information",
-                roomCache: "debug",
-                structureCache: "debug",
-                roomManager: "debug",
-                spawnManager: "debug",
-                energyAcquisition: "information", 
-            } };
-
+        Memory.log = { default: "error", modules: { harvester: "debug" } }; // one subsystem loud
+        Memory.log = { default: "error", groups: { management: "debug" } }; // all management modules
+        Memory.log = { default: "error", groups: { roles: "debug" } }; // all role modules
         delete Memory.log; // back to code defaults
 
-    // Toggle visualization
-        Memory.rooms["sim"].layoutVisualize = true; // turn on overlay
-        Memory.rooms["W1N1"].layoutVisualize = false; // turn off overlay
+    Room Construction:
+        // Toggle visualization
+            Memory.rooms["E2N56"].layoutVisualize = true; // turn on overlay
+            Memory.rooms["W1N1"].layoutVisualize = false; // turn off overlay
 
-    // Filter by RCL layer
-        Memory.rooms["W1N1"].layoutVisualizeRcl = 3; // show only RCL 3 items
-        Memory.rooms["W1N1"].layoutVisualizeRcl = 0; // show all layers
-        delete Memory.rooms["W1N1"].layoutVisualizeRcl; // same as 0
+        // Filter by RCL layer
+            Memory.rooms["W1N1"].layoutVisualizeRcl = 3; // show only RCL 3 items
+            Memory.rooms["W1N1"].layoutVisualizeRcl = 0; // show all layers
+            delete Memory.rooms["W3S1"].layoutVisualizeRcl; // same as 0
 
-    // Re-trigger plan generation (iterate)
-        delete Memory.rooms["W1N1"].layoutPlan; // clears plan; generator runs next tick
+        // Re-trigger plan generation (iterate)
+            delete Memory.rooms["E2N56"].layoutPlan; // clears plan; generator runs next tick
 
-    // Approve for construction
-        Memory.rooms["sim"].layoutApproved = true; // constructor starts placing sites
+        // Approve for construction
+            Memory.rooms["E2N56"].layoutApproved = false; // constructor starts placing sites
 
     Signage
         Game.creeps['upgrader-5492007'].signController(Game.rooms['W3S1'].controller, '') # must be within range 1 of the controller
