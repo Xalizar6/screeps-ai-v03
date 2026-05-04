@@ -74,9 +74,13 @@ When the discussion converges:
 
 ### 4. Hand off
 
-Invoke the [`writing-agent-prompts`](../writing-agent-prompts/SKILL.md) skill
-to produce a single copyable Composer2 prompt. Follow that skill's rules
-exactly:
+**Wait for an explicit request before generating the prompt.** After
+`/grill-me` completes (or the user is otherwise satisfied), ask: _"Ready for
+the handoff prompt?"_ Do not produce it automatically.
+
+When the user confirms, invoke the
+[`writing-agent-prompts`](../writing-agent-prompts/SKILL.md) skill to produce
+a single copyable Composer2 prompt. Follow that skill's rules exactly:
 
 - One-line goal, context, scope, out-of-scope, standards, verify, build
   summary, documentation upkeep, human checkpoint.
